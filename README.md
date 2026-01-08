@@ -1,2 +1,6 @@
-# mysql-dba-portfolio
-Linux 기반 MySQL DBA 포트폴리오 (설치·설정, 백업·복구, 장애 대응, 성능 튜닝 등)
+# Linux-based MySQL DBA Portfolio
+## Installation, Operations, Backup & Recovery, Troubleshooting Cases
+
+This repository documents hands-on experience in MySQL database administration on a Linux environment.
+
+It focuses on core DBA responsibilities such as installation and configuration, backup and recovery, performance tuning, and troubleshooting cases.
