@@ -288,3 +288,309 @@ ERROR 1062 (23000): Duplicate entry 'a' for key 't1.c1'
 * **즉, update가 자주 일어나는 테이블이라면 char가 이론적으로 유리할 수 있음**
 <br>
 
+# DATE
+* 날짜만 저장 (시간X)
+* 형식 : `YYYY-MM-DD`
+* 저장 범위 : `1000-01-01` ~ `9999-12-31`
+* 저장 공간 : 3byte
+```sql
+create table t1 (c1 date);
+insert into t1 values ('2026-01-13');
+```
+### 전용 추출 함수 - `YEAR()`, `MONTH()`, `DAY()`, `EXTRACT()`
+```sql
+select now(), year(now()) as year, month(now()) as month, day(now()) as day;
+```
+```sql
+select now(), extract(year from now()) as year,
+              extract(month from now()) as month,
+              extract(day from now()) as day;
+```
+```sql
++---------------------+------+-------+------+
+| now()               | year | month | day  |
++---------------------+------+-------+------+
+| 2026-01-13 16:45:45 | 2026 |     1 |   13 |
++---------------------+------+-------+------+
+1 row in set (0.00 sec)
+```
+<br>
+
+# YEAR
+* 연도만 저장
+* 형식 : `YYYY`
+* 저장 범위 : `1901` ~ `2155` (또는 `0000`)
+* 저장 공간 : 1byte
+* 데이터 타입에 month, day는 없지만 year는 있음
+    * 독립적인 의미를 갖는 최소 단위라고 판단하기 때문에
+```sql
+create table t1 (y year);
+insert into t1 values (2026);
+```
+<br>
+
+# TIME
+* 시간 또는 시간 간격 저장
+* 형식 : `HH:MM:SS[.fraction]`
+* 저장 범위 : `-838:59:59` ~ `838:59:59`
+* 저장 공간 : 3byte(+fractional seconds)
+* 하루(24시간)를 넘는 시간도 표현 가능
+    * 시각 표현에는 부적합 → `DATETIME`/`TIMESTAMP` 사용
+```sql
+create table t1 (c1 time);
+insert into t1 values ('12:34:56'), ('25:00:00');
+```
+### 전용 추출 함수 - `HOUR()`, `MINUTE()`, `SECOND()`, `EXTRACT()`
+```sql
+select now(), hour(now()) as hour, minute(now()) as minute, second(now()) as second;
+```
+```sql
+select now(),
+       extract(hour from now()) as hour,
+       extract(minute from now()) as minute,
+       extract(second from now()) as second;
+```
+```sql
++---------------------+------+--------+--------+
+| now()               | hour | minute | second |
++---------------------+------+--------+--------+
+| 2026-01-13 16:56:55 |   16 |     56 |     55 |
++---------------------+------+--------+--------+
+```
+### 시간을 초 단위로 변환 - `TIME_TO_SEC()`
+* 근무시간, 누적시간 계산에 용이
+```sql
+select hour(now()), minute(now()), second(now()), time_to_sec(now());
+```
+```sql
++-------------+---------------+---------------+--------------------+
+| hour(now()) | minute(now()) | second(now()) | time_to_sec(now()) |
++-------------+---------------+---------------+--------------------+
+|          16 |            51 |            28 |              60688 |
++-------------+---------------+---------------+--------------------+
+1 row in set (0.00 sec)
+```
+* 16 * 3600 + 51 * 60 + 28  = 60688
+### 초를 시간을 변환 - `SEC_TO_TIME()`
+```sql
+select sec_to_time(60688);
+```
+```sql
++--------------------+
+| sec_to_time(60688) |
++--------------------+
+| 16:51:28           |
++--------------------+
+1 row in set (0.00 sec)
+```
+### TIME 연산 함수 - `ADDTIME()`, `SUBTIME()`
+```sql
+select addtime('10:11:42', '01:37:51'), subtime('10:11:42', '01:37:51');
+```
+```sql
++---------------------------------+---------------------------------+
+| addtime('10:11:42', '01:37:51') | subtime('10:11:42', '01:37:51') |
++---------------------------------+---------------------------------+
+| 11:49:33                        | 08:33:51                        |
++---------------------------------+---------------------------------+
+1 row in set (0.00 sec)
+```
+<br>
+
+# DATETIME
+* 날짜 + 시간 저장
+* 형식 : `YYYY-MM-DD HH:MM:SS[.fraction]`
+* 저장 범위 : `1000-01-01 00:00:00` ~ `9999-12-31 23:59:59`
+* 저장 공간 : 5byte(+fractional seconds)
+* 타임존의 영향을 받지 않음
+    * **타임존(Time Zone) : 지역마다의 기준 시간**
+    * 저장된 값 그대로 저장/조회
+* ex) 타임존 개념이 없는 고정 시각
+    * 생일, 예약 시간 등
+* 날짜/시간 추출 함수 사용 가능
+    * `year()`, `month()`, `day()`
+    * `hour()`, `minute()`, `second()`
+    * `extract()`
+* **비교 연산자(<, >, <=, >=) 사용 가능**
+    * 오히려 문자열로 변환해서 비교하는 것보다 성능 좋음
+* 리터럴과 비교 가능
+    * 내부적으로 리터를을 DATETIME으로 암문적 변환
+    * 단, 형식은 반드시 지켜야 함 ('YYYY-MM-DD HH:MM:SS')
+* date 타입과 비교도 가능
+    * date 타입이 datetime 타입으로 자동 변환됨
+        * ex) 2026-01-13' → '2026-01-13 00:00:00'
+```sql
+create table t1 (dt datetime);
+insert into t1 values ('2026-01-13 14:30:00');
+```
+### 날짜만, 시간만 추출 - `DATE()`, `TIME()`
+```sql
+select now(), date(now()) as date, time(now()) as time;
+```
+```sql
++---------------------+------------+----------+
+| now()               | date       | time     |
++---------------------+------------+----------+
+| 2026-01-13 17:50:10 | 2026-01-13 | 17:50:10 |
++---------------------+------------+----------+
+1 row in set (0.00 sec)
+```
+### 현재 시각 조회
+* 반환 값은 DATETIME 타입
+```sql
+select now(); -- 트랜잭션 시작 시점 기준 (쿼리 내에서 값 고정)
+select sysdate(); -- 실행 시점 기준 (쿼리 내에서 값이 바뀔 수 있음)
+```
+### 날짜/시간 연산 - `DATE_ADD()`, `DATE_SUB()`
+* 테이블의 컬럼 값에도 사용 가능
+```sql
+select now(), date_add(now(), interval 1 day) as "date_add(day)",
+              date_sub(now(), interval 5 hour) as "date_sub(hour)";
+```
+```sql
++---------------------+---------------------+---------------------+
+| now()               | date_add(day)       | date_sub(hour)      |
++---------------------+---------------------+---------------------+
+| 2026-01-13 17:31:58 | 2026-01-14 17:31:58 | 2026-01-13 12:31:58 |
++---------------------+---------------------+---------------------+
+1 row in set (0.00 sec)
+```
+* `date_add(day)` : 현재 날짜/시각에서 +1 일
+* `date_add(hour)` : 현재 날짜/시각에서 -5 시간
+* interval n [ year | month | day | hour | minute | second ] 모두 가능
+### 두 TIMESTAMP의 차이를 특정 단위로 계산 - `TIMESTAMPDIFF()`
+```sql
+create table t1 (c1 datetime, c2 datetime);
+insert into t1 values ('2026-01-13 17:40:45', '2027-03-16 21:45:51');
+select c1, c2, timestampdiff(year, c1, c2) as yeardiff,
+               timestampdiff(month, c1, c2) as monthdiff,
+               timestampdiff(day, c1, c2) as daydiff
+from t1;
+```
+```sql
++---------------------+---------------------+----------+-----------+---------+
+| c1                  | c2                  | yeardiff | monthdiff | daydiff |
++---------------------+---------------------+----------+-----------+---------+
+| 2026-01-13 17:40:45 | 2027-03-16 21:45:51 |        1 |        14 |     427 |
++---------------------+---------------------+----------+-----------+---------+
+1 row in set (0.00 sec)
+```
+```sql
+select c1, c2,
+               timestampdiff(hour, c1, c2) as hourdiff,
+               timestampdiff(minute, c1, c2) as minutediff,
+               timestampdiff(second, c1, c2) as seconddiff
+from t1;
+```
+```sql
++---------------------+---------------------+----------+------------+------------+
+| c1                  | c2                  | hourdiff | minutediff | seconddiff |
++---------------------+---------------------+----------+------------+------------+
+| 2026-01-13 17:40:45 | 2027-03-16 21:45:51 |    10252 |     615125 |   36907506 |
++---------------------+---------------------+----------+------------+------------+
+1 row in set (0.00 sec)
+```
+### 포맷 변환 - `DATE_FORMAT()`
+```sql
+select date_format(now(), '%Y-%m-%d %H:%i:%s %p');
+```
+* year
+    * %Y : 4자리 → `2026`
+    * %y : 마지막 2자리 → `26`
+* month
+    * %m : 숫자 2자리 → `01 ~ 12`
+    * %c : 숫자 1 ~ 2자리 → `1 ~ 12`
+    * %M : 이름 영문 → `January`
+    * %b : 이름 영문 약어 → `Jan`
+* day
+    * %d : 숫자 2 자리 → `01 ~ 31`
+    * %e : 숫자 1 ~ 2자리 → `1 ~ 31`
+    * %D : 서수 → `1st`
+    * %j : 연중 일수 → `001 ~ 366`
+* hour
+    * %H : 24시 2자리 → `00 ~ 23`
+    * %k : 24시 1 ~ 2자리 → `0 ~ 23`
+    * %h : 12시 2자리 → `01 ~ 12`
+* minute
+    * %i : 2자리 → `00 ~ 59`
+* second
+    * %s : 2자리 → `00 ~ 59`
+    * %f : 마이크로초
+* AM / PM 표시 : %p
+<br>
+
+# TIMESTAMP
+* 날짜 + 시간 저장
+* 형식 : `YYYY-MM-DD HH:MM:SS[.fraction]`
+* 저장 범위 : `1970-01-01 00:00:01 UTC` ~ `2038-01-19 03:14:07 UTC`
+* 저장 공간 : 4byte(+fractional seconds)
+* 세션 타임존의 영향을 받음
+    * **타임존(Time Zone) : 지역마다의 기준 시간**
+    * **UTC(Coordinated Universal Time) : 전 세계가 공통으로 쓰는 기준 시계**
+    * 저장 시 UTC로 변환
+    * 조회 시 세션 타임존 기준으로 변환
+* ex) 서버/세션 타임존 기준이 중요한 경우
+    * 로그, 이벤트 발생 시각 등
+### 세션 타임존 확인
+```sql
+select @@session.time_zone;
+```
+```sql
++---------------------+
+| @@session.time_zone |
++---------------------+
+| SYSTEM              |
++---------------------+
+1 row in set (0.00 sec)
+```
+* 현재 세션의 time_zone 값이 OS의 시스템 타임존을 참조 중
+* 세션 타임존이 서버 타임존을 그대로 따라간다는 의미
+### 타임존 설정
+```sql
+set time_zone = 'UTC';
+set time_zone = 'Asia/Seoul';
+```
+### 여러 지역의 타임존으로 timestamp 값 확인해보기
+#### MySQL 서버와 현재 세션의 타임존 설정 값 확인
+* 현재 MySQL과 세션은 타임존을 UTC로 설정
+```sql
+select @@global.time_zone, @@session.time_zone, now();
+```
+```sql
++--------------------+---------------------+---------------------+
+| @@global.time_zone | @@session.time_zone | now()               |
++--------------------+---------------------+---------------------+
+| +00:00             | +00:00              | 2026-01-13 11:20:12 |
++--------------------+---------------------+---------------------+
+1 row in set (0.00 sec)
+```
+#### 현재 시각을 서울과 UTC 기준으로 조회
+```sql
+drop table t1;
+create table t1 (c1 timestamp);
+
+set time_zone = '+09:00'; -- 한국 시각 = UTC + 9
+insert into t1 values (now());
+select * from t1;
+set time_zone = '+00:00'; -- UTC
+select * from t1;
+```
+* 현재 시각 (서울)
+```sql
++---------------------+
+| c1                  |
++---------------------+
+| 2026-01-13 20:20:32 |
++---------------------+
+1 row in set (0.00 sec)
+
+```
+* 현재 시각 (UTC)
+```sql
++---------------------+
+| c1                  |
++---------------------+
+| 2026-01-13 11:20:32 |
++---------------------+
+1 row in set (0.00 sec)
+```
