@@ -201,4 +201,90 @@ decimal(5, 2) / decimal(4, 1) = decimal(10, 7)
     * decimal의 정확성을 지키고 싶다면 double을 decimal로 캐스팅 필요    
 <br>
 
-#  CHAR vs VARCHAR
+# CHAR vs VARCHAR
+* `char(n)`
+    * 고정 길이
+    * 지정한 길이만큼 항상 채움
+    * 부족한 길이만큼 공백 자동 패딩
+    * 디스크/메모리 위치 계산이 단순
+    * 비교 시 char 컬럼 값의 trailing space 제거 후 비교
+* `varchar(n)`
+    * 가변 길이
+    * 실제 길이만큼만 저장
+    * 공백 그대로 유지
+    * 실제 데이터 길이 + 길이 정보(1~2byte) 저장
+        * `(n)`은 문자 개수 제한, 저장 공간 제한이 아님
+    * 비교 시 공백 포함 (공백을 데이터로 취급)
+### 길이 비교해보기
+* `length()`는 문자열의 바이트 길이 반환
+    * char 타입의 경우 뒤 공백을 제거한 후 계산
+* **MySQL은 SQL 레벨에서 char 값을 다룰 때 항상 뒤 공백을 제거한 후 보여줌**
+```sql
+create table t1 (c1 char(10), c2 varchar(10));
+insert into t1 values ('aaa', 'aaa');
+insert into t1 values ('bbb', 'bbb ');
+select c1, c2, length(c1) as char_length, length(c2) as varchar_length from t1;
+```
+```sql
++------+------+-------------+----------------+
+| c1   | c2   | char_length | varchar_length |
++------+------+-------------+----------------+
+| aaa  | aaa  |           3 |              3 | -- 값이 같은 이유? length() 때문에
+| bbb  | bbb  |           3 |              4 |
++------+------+-------------+----------------+
+2 rows in set (0.00 sec)
+```
+### char 타입이 왜 필요할까?
+* char의 패딩 공백은 SQL 레벨에서 값이 아니라, **저장, 비교, 인덱스 구조에서 차이를 만든다**
+#### 비교 연산에서의 char
+* 의미적으로 동일해야 하는 코드에 사용
+* 공백 차이를 무시해야 하는 경우 사용
+```sql
+create table t1 (c1 char(10), idx int);
+insert into t1 values ('abc', 1), ('abc ', 2);
+select * from t1 where c1 = 'abc';
+```
+```
++------+------+
+| c1   | idx  |
++------+------+
+| abc  |    1 |
+| abc  |    2 |
++------+------+
+2 rows in set (0.01 sec)
+```
+* 참고) `'abc '` 와 비교할 경우
+    * `'abc '` 는 SQL 문자열 리터럴이며 trailing space가 제거되지 않음
+    * 비교 시 char 컬럼만 trailing space가 제거됨
+```sql
+select * from t1 where c1 = 'abc ';
+Empty set (0.00 sec)
+```
+#### UNIQUE, PK 제약에서의 char
+* UNIQUE/PK에서 공백 중복을 막고 싶을 때 사용
+    * UNIQUE 와 PK 제약이 걸려있는 컬럼의 값은 테에블 내에서 유일해야 함
+    * char 타입 컬럼 값은 패딩 공백 제거 후 같은 문자열이면 동일한 값으로 인식
+        * **저장 값이 같은게 아니라 비교 규칙에서 trailing space를 제거하기 때문에**
+```sql
+create table t1 (c1 char(10) unique);
+insert into t1 values ('a'); -- success
+insert into t1 values ('a '); -- ERROR 1062
+```
+```sql
+ERROR 1062 (23000): Duplicate entry 'a' for key 't1.c1'
+```
+#### 인덱스 구조에서의 char
+* char 인덱스
+    * 고정 길이이므로 B-Tree 노드에서 정렬 계산이 단순해 질 수 있음
+    * 예전 MyISAM 시대에서 varchar 인덱스와 성능 차이가 있었음
+    * **InnoDB에서의 거의 체감 불가**
+    * 현재는 인덱스 키의 길이가 정말 같을때만 char 사용
+#### 저장 구조에서의 char
+* char
+    * 고정 길이로 row 내 위치가 고정적
+    * 메모리 접근이 단순
+* varchar
+    * 가변 길이로, 길이 변경 시 row 재배치가 발생할 수 있음
+* **즉, update가 자주 일어나는 테이블이라면 char가 이론적으로 유리할 수 있음**
+<br>
+
