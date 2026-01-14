@@ -11,28 +11,18 @@ create table 테이블명 (
 * 컬럼명 (column name)
     * 테이블 내에서 유일해야 함
     * 명확하고 의미 있는 이름 사용 권장
-* 자료형 (data type)
+* 자료형 (data type) [→ 각 자료형에 대한 자세한 내용 보기](data-types-theory.md)
     * 숫자형 : `INT`, `BIGINT`, `FLOAT`, `DOUBLE`, `DECIMAL`, `BOOLEAN`
     * 문자형 : `CHAR(n)`, `VARCHAR(n)`, `TEXT`
     * 날짜 / 시간형 : `DATE`, `DATETIME`, `TIMESTAMP`, `TIME`, `YEAR`
     * 바이너리 : `BLOB`
-* 제약조건 (constraints)
-    * 기본키 (`primary key`)
-        * 테이블 내 각 행을 유일하게 식별하는 컬럼 또는 컬럼 조합
-        * 중복 불가
-        * null 불가
-        * 두 개 이상의 컬럼을 묶어서 복합 기본키로 사용 가능 (`composite primary key`)
+* 제약조건 (constraints) [→ 각 제약조건에 대한 자세한 내용 보기](constraint-theory.md)
+    * `primary key`
+    * `default`
     * `not null`
-        * 해당 컬럼은 반드시 값을 가져야 함
-        * null을 허용하지 않음
     * `unique`
-        * 컬럼 값이 중복되지 않도록 보장
-    * 참조키 (`foreign key`)
-        * 다른 테이블의 기본키를 참조하여 데이터 무결정 유지
-    * `default` 값
-        * 컬럼에 값이 없을 경우 자동으로 지정되는 기본값
-    * 조건 제한 (`check`)
-        * 컬럼 값에 대한 조건을 지정
+    * `check`
+    * `foreign key`
 * 기타 옵션 및 고려사항
     * `auto_increment`
         * 행이 추가될 때마다 자동으로 1씩 증가하는 숫자 할당
