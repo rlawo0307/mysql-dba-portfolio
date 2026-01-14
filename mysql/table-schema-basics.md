@@ -12,10 +12,10 @@ create table 테이블명 (
     * 테이블 내에서 유일해야 함
     * 명확하고 의미 있는 이름 사용 권장
 * 자료형 (data type)
-    * 숫자형 : `INT`, `BIGINT`, `FLOAT`, `DOUBLE`, `DECIMAL`
-    * 문자형 : `CHAR(n)`, `VARCHAR(n)`
+    * 숫자형 : `INT`, `BIGINT`, `FLOAT`, `DOUBLE`, `DECIMAL`, `BOOLEAN`
+    * 문자형 : `CHAR(n)`, `VARCHAR(n)`, `TEXT`
     * 날짜 / 시간형 : `DATE`, `DATETIME`, `TIMESTAMP`, `TIME`, `YEAR`
-    * 기타 : `BOOLEAN`, `TEXT`
+    * 바이너리 : `BLOB`
 * 제약조건 (constraints)
     * 기본키 (`primary key`)
         * 테이블 내 각 행을 유일하게 식별하는 컬럼 또는 컬럼 조합

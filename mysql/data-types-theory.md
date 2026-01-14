@@ -25,6 +25,18 @@ ERROR 1264 (22003): Out of range value for column 'c1' at row 1
 ```
 <br>
 
+# BOOLEAN
+* 참(true) 또는 거짓(false) 두 가지 값만 가질 수 있는 데이터 타입
+* 내부적으로 `TINYINT(1)`의 별칭(alias)로 처리
+* 1byte **정수형**
+    * true = 1
+    * false = 0
+```sql
+create table t1 (c1 boolean);
+insert into t1 values (true), (false), (1), (0);
+```
+<br>
+
 # FLOAT vs DOUBLE
 * `float`
     * 근사값(부동소수점)
@@ -286,6 +298,48 @@ ERROR 1062 (23000): Duplicate entry 'a' for key 't1.c1'
 * varchar
     * 가변 길이로, 길이 변경 시 row 재배치가 발생할 수 있음
 * **즉, update가 자주 일어나는 테이블이라면 char가 이론적으로 유리할 수 있음**
+<br>
+
+# TEXT
+* 긴 문자열 데이터를 저장
+* `varchar`보다 훨씬 큰 용량의 텍스트 데이터를 저장할 수 있음
+* 별도의 저장 공간(page)에 저장되고 포인터로 연결됨
+    * InnoDB는 행(row) 단위로 데이터를 저장
+    * varchar 같이 작은 문자열은 행 내부에 바로 저장
+    * `text` 칼럼 데이터의 처음 `767byte + 포인터`를 행 내부에 저장하고
+    * 나머지 데이터는 별도의 overflow 페이지에 저장
+    * `default`를 지정할 수 없음
+    * 컬럼에 인덱스 생성 시에도 일부 길이만 키로 인덱싱
+        * 인덱스 키 값의 최대 길이 = 767byte (InnoDB 기본 기준)
+            * MySQL 버전에따라 최대 3072byte까지 확장 가능
+        * 일반적으로 `컬럼명(길이)` 형태로 길이를 지정하여 인덱스 생성
+* 저장 공간과 성능을 고려하여 사용에 주의 필요
+* 종류
+    * `TINYTEXT` : 255byte
+    * `TEXT` : 64KB
+    * `MEDIUMTEXT` : 16MB
+    * `LONGTEXT` : 4GB
+* **MySQL에는 별도의 `clob` 타입이 없고 대신 `text`계열이 이를 대체**
+### text 컬럼에 인덱스 생성
+* c1 컬럼의 앞 255자까지만 인덱싱
+* 길이를 지정하지 않으면 에러 발생 → `ERROR 1064`
+```sql
+create table t1 (c1 text, index idx1 (c1(255));
+```
+```sql
+select c.table_name, c.column_name, c.column_type, s.index_name
+from information_schema.statistics s, information_schema.columns c
+where s.column_name = c.column_name and c.table_name = 't1';
+-- show index from t1;
+```
+```sql
++------------+-------------+-------------+------------+
+| TABLE_NAME | COLUMN_NAME | COLUMN_TYPE | INDEX_NAME |
++------------+-------------+-------------+------------+
+| t1         | c1          | text        | idx1       |
++------------+-------------+-------------+------------+
+1 row in set (0.00 sec)
+```
 <br>
 
 # DATE
@@ -594,3 +648,14 @@ select * from t1;
 +---------------------+
 1 row in set (0.00 sec)
 ```
+<br>
+
+# BLOB
+* Binary Large Object
+* 바이너리 데이터(이미지, 오디오, 동영상 등)을 저장하는 데 사용
+* 인코딩 없이 바이너리 저장
+* 종류
+    * `BLOB` : 64KB
+    * `MEDIUMBLOB` : 16MB
+    * `LONGBLOB` : 4GB
+* `text` 와 동일하게 처음 `767byte + 포인터`만 행 내부에 저장되고 나머지는 별도의 오버플로우 페이지에 저장됨
