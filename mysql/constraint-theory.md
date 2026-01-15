@@ -265,5 +265,189 @@ alter table t1 drop check chk1;
 ```
 <br>
 
-# FOREIGN KEY
-* 다른 테이블의 기본키를 참조하여 데이터 무결정 유지
+# FOREIGN KEY (FK)
+* 한 테이블의 컬럼이 다른 테이블의 `pk` 또는 `Unique Key`를 참조하도록 강제
+    * 참조 당하는 테이블 → 부모 테이블
+    * 참조 하는 테이블 → 자식 테이블
+* **자식 테이블의 fk 값은 반드시 부모 테이블의 pk에 존재해야 함**
+    * 데이터 무결성 보장 → `참조 무결성`
+    * 존재하지 않는 데이터 참조 방지
+    * 단, `null`은 무결성 검사 대상이 아님
+* 참조 컬럼과 컬럼 정의 전체가 동일해야 함
+    * 데이터 타입
+    * 길이 (표현 방식)
+    * signed/unsigned
+    * 문자셋
+    * collation
+* InnoDB 스토리지 엔진에서만 지원
+    * MyISAM에서는 문법만 허용되고 동작하지 않음
+* `on delete` / `on update` 옵션
+    * 부모 테이블의 pk/uk 행이 삭제 또는 수정될 때 자식 테이블의 fk 행에 어떤 동작을 할지 정의
+    * 참조 무결성 처리 방식을 명시하는 옵션
+    * 종류
+        * `restrict` (default)
+            * 참조 중인 자식 행이 하나라도 있으면 부모 행을 삭제/수정 할 수 없음
+            * 즉시 에러 발생
+        * `cascade`
+            * 부모 행이 변경되면 자식 행에도 그대로 수행
+            * 연쇄 삭제의 위험이 있으므로 주의 필요
+        * `set null`
+            * 부모 행이 변경되면 자식 테이블의 fk 컬럼 값을 null로 변경
+            * 자식 테이블의 fk는 반드시 null을 허용해야 함
+            * 부모 행이 변경될 때 자식 행을 강제로 삭제하지 않고 **부모 - 자식 관계를 안전하게 끊기 위해 사용**
+        * `no action`
+            * MySQL에서는 `restrict`과 동일하게 동작
+* fk 컬럼에 자동으로 인덱스 생성
+    * 이미 인덱스가 걸려있다면 재사용
+    * 부모 - 자식 관계의 참조 무결성 검사를 빠르게 하기 위해 사용
+### fk 생성
+```sql
+create table t1 (c1 int primary key, c2 varchar(10));
+
+create table t2 (c1 int primary key, c2 int, constraint
+                 fk1 foreign key (c2) references t1(c1));
+
+create table t3 (c1 int primary key, c2 int);
+alter table t3 add constraint fk2 foreign key(c2) references t1(c1);
+```
+### 참조 무결성 확인
+```sql
+insert into t1 values (1, "aaa");
+
+insert into t2 values (100, 1); -- success
+insert into t2 values (200, 2); -- ERROR 1452
+```
+```sql
+ERROR 1452 (23000): Cannot add or update a child row: a foreign key constraint fails (`db1`.`t2`, CONSTRAINT `fk1` FOREIGN KEY (`c2`) REFERENCES `t1` (`c1`))
+```
+### restrict 옵션 동작 확인
+```sql
+alter table t2 drop foreign key fk1; -- 기존의 fk 삭제
+delete from t1;
+delete from t2;
+alter table t2 add constraint fk_restrict foreign key (c2) references t1(c1);
+
+insert into t1 values (1, 'aaa');
+insert into t2 values (100, 1);
+
+delete from t1 where c1 = 1; -- ERROR 1451
+update t1 set c1 = 2 where c1 = 1; -- ERROR 1451
+```
+```sql
+ERROR 1451 (23000): Cannot delete or update a parent row: a foreign key constraint fails (`db1`.`t2`, CONSTRAINT `fk1` FOREIGN KEY (`c2`) REFERENCES `t1` (`c1`))
+```
+### cascade 옵션 동작 확인
+```sql
+alter table t2 drop foreign key fk_restrict;
+alter table t2 add constraint fk_cascade foreign key(c2) references t1(c1) on delete cascade on update cascade;
+
+select t1.c1 as pk, t2.c2 as fk from t1, t2; -- before
+update t1 set c1 = 3 where c1 = 1;
+select t1.c1 as pk, t2.c2 as fk from t1, t2; -- after
+```
+```sql
+[ BEFORE ]              [ AFTER ]
++----+------+           +----+------+
+| pk | fk   |           | pk | fk   |
++----+------+     →     +----+------+
+|  1 |    1 |           |  3 |    3 |
++----+------+           +----+------+
+```
+```sql
+delete from t1 where c1 = 3;
+select t1.c1 as pk, t2.c2 as fk from t1, t2;
+```
+```sql
+Empty set (0.00 sec) -- 부모와 자식을 함께 삭제
+```
+### set null 옵션 동작 확인
+```sql
+alter table t2 drop foreign key fk_cascade;
+alter table t2 add constraint fk_set_null foreign key(c2) references t1(c1) on delete set null on update set null;
+
+insert into t1 values (1, 'aaa');
+insert into t2 values (100, 1);
+
+select t1.c1 as pk, t2.c2 as fk from t1, t2;
+update t1 set c1 = 3 where c1 = 1;
+select t1.c1 as pk, t2.c2 as fk from t1, t2;
+```
+```sql
+[ BEFORE ]              [ AFTER ]
++----+------+           +----+------+
+| pk | fk   |           | pk | fk   |
++----+------+     →     +----+------+
+|  1 |    1 |           |  3 | NULL |
++----+------+           +----+------+
+```
+#### 그렇다면 fk 제약 자체가 사라진 것인가?
+* `information_schema.key_column_usage` 조회
+* `information_schema.referential_constraints` 조회
+```sql
+select kcu.constraint_name, kcu.table_name, kcu.column_name, kcu.referenced_table_name, kcu.referenced_column_name, rc.update_rule, rc.delete_rule
+from information_schema.key_column_usage kcu
+join information_schema.referential_constraints rc
+on kcu.constraint_schema = rc.constraint_schema
+and kcu.constraint_name = rc.constraint_name
+where kcu.table_schema = database()
+and kcu.table_name = 't2';
+```
+```sql
++-----------------+------------+-------------+-----------------------+------------------------+-------------+-------------+
+| CONSTRAINT_NAME | TABLE_NAME | COLUMN_NAME | REFERENCED_TABLE_NAME | REFERENCED_COLUMN_NAME | UPDATE_RULE | DELETE_RULE |
++-----------------+------------+-------------+-----------------------+------------------------+-------------+-------------+
+| fk_set_null     | t2         | c2          | t1                    | c1                     | SET NULL    | SET NULL    |
++-----------------+------------+-------------+-----------------------+------------------------+-------------+-------------+
+1 row in set (0.00 sec)
+```
+* **데이터 무결성은 깨진 것처럼 보인다**
+#### 새로 들어오는 데이터에 대해서 fk 제약은 제대로 동작할까?
+```sql
+insert into t2 values (200, 1); -- ERROR 1452
+```
+```sql
+ERROR 1452 (23000): Cannot add or update a child row: a foreign key constraint fails (`db1`.`t2`, CONSTRAINT `fk_set_null` FOREIGN KEY (`c2`) REFERENCES `t1` (`c1`) ON DELETE SET NULL ON UPDATE SET NULL)
+```
+* fk 제약은 여전히 살아있고 정상적으로 동작함
+* 즉, 데이터 무결성이 깨진것이 아니라 **관계 무결성이 의도적으로 해제되었다** 라고 해석하는 것이 맞음
+* `null`은 무결성 검사 대상이 아님
+    * null은 무결성을 유지하는 방식 중 하나
+    * **null값을 가진 자식은 이제 부모가 없다**를 표현
+### FK의 인덱스 확인
+```sql
+select table_name, non_unique, index_name, column_name
+from information_schema.statistics
+where table_name = 't2';
+```
+```sql
++------------+------------+-------------+-------------+
+| TABLE_NAME | NON_UNIQUE | INDEX_NAME  | COLUMN_NAME |
++------------+------------+-------------+-------------+
+| t2         |          1 | fk_set_null | c2          |
+| t2         |          0 | PRIMARY     | c1          |
++------------+------------+-------------+-------------+
+2 rows in set (0.01 sec)
+```
+* fk 컬럼에 걸려있는 인덱스는 `non unique index`
+    * fk 컬럼은 기본적으로 중복을 허용
+    * 여러 자식 행이 하나의 부모 행을 참조할 수 있어야 함
+    * 만약 unique 라면 오직 하나의 자식만 하나의 부모를 참조하게 됨
+#### fk 제약을 삭제하면 인덱스도 사라질까?
+```sql
+alter table t2 drop foreign key fk_set_null;
+
+select table_name, non_unique, index_name, column_name
+from information_schema.statistics
+where table_name = 't2';
+```
+```sql
++------------+------------+-------------+-------------+
+| TABLE_NAME | NON_UNIQUE | INDEX_NAME  | COLUMN_NAME |
++------------+------------+-------------+-------------+
+| t2         |          1 | fk_set_null | c2          |
+| t2         |          0 | PRIMARY     | c1          |
++------------+------------+-------------+-------------+
+2 rows in set (0.00 sec)
+```
+* fk 제약 조건을 삭제해도 자동으로 생성된 인덱스는 살아있음
+* 즉, fk 제약 제거 후 인덱스 정리는 직접 해야 함
