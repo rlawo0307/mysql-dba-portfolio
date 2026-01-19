@@ -123,17 +123,50 @@
         * 접두사 길이를 충분히 길게 설정
         * **가능하면 전체 컬럼 인덱싱이 안전**
  ```sql
- create table t1 (c1 varchar(100), c2 text(100), index idx1 (c1(3)));
+ create table t1 (c1 varchar(100), c2 text, index idx1 (c1(3)));
  create unique index idx2 on t1(c2(3));
  ```
- ### Functional Index
- ### Full-Text Index
- ### Spatial Index
- ### Adaptive Hash Index
+### Functional Index
+ * 컬럼 값에 함수를 적용한 결과를 인덱스로 생성
+ * 컬럼에 함수가 적용된 조건에서도 인덱슬 탈 수 있게 해줌
+    * 일반 인덱스는 컬럼에 함수가 적용되면 인덱스를 사용 할 수 없음. 단, 값에 함수가 적용된 경우는 인덱스 사용 가능
+        * ex) `lower(c1) = 'a'` → 인덱스 사용 불가
+        * ex) `c1 = lower('A')` → 인덱스 사용 가능
+* 인덱스 정의와 쿼리의 함수 표현식이 완전히 동일해야 사용 가능
+* 대소문자 무시 검색, 날짜 가공 검색에서 유용
+    * `lower()`, `upper()`, `date()`, `year()` 등을 자주 사용할 때
+```sql
+create table t1 (c1 char);
+create index idx on t1((lower(c1)));
+explain analyze select * from t1 where lower(c1) = 'a';
+```
+```sql
+| -> Index lookup on t1 using idx (lower(c1)='a')  (cost=0.35 rows=1) (actual time=0.0113..0.0113 rows=0 loops=1)
+ |
+```
+### Adaptive Hash Index
+* InnoDB가 내부적으로 자동 생성하는 인덱스
+* 자주 사용되는 B+Tree 페이지를 메모리 내부에 hash 구조로 캐싱
+    * B+Tree 인덱스를 대체하지 않으며, 보조적인 캐시 역할 수행
+* **사용자가 직접 인덱스를 생성/수정/삭제할 수 없음**
+* equality(=) 검색에 매우 빠름
+* 범위 검색, 정렬, like 검색에는 사용되지 않음
+#### 현재 AHI 상태 확인
+```sql
+show variables like 'innodb_adaptive_hash_index';
+```
+#### AHI 활성화/비활성화
+* `global` 설정이므로 권한 필요
+    * `SUPER` : 서버 전역 제어 권한
+    * `SYSTEM_VARIABLES_ADMIN` : 시스템 변수 변경 권한
+* 새 커넥션부터 적용 (기존 세션에는 영향 없음)
+```sql
+set global innodb_adaptive_hash_index = ON;
+set global innodb_adaptive_hash_index = OFF;
+```
  <br>
 
 # FULL SCAN vs INDEX SCAN
-
 # 옵티마이저와 INDEX 선택
 # 복합 INDEX 설계 전략
 # INDEX 생성 및 삭제
