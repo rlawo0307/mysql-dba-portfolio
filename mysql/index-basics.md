@@ -192,6 +192,7 @@ set global innodb_adaptive_hash_index = OFF;
  <br>
 
 # FUll TABLE SCAN vs INDEX SCAN
+[→ 각 scan 방식에 대한 실행 계획 자세히 보기](labs/explain-table-access-types.md)
 ## Full Table Scan
 * 테이블의 모든 row를 처음부터 끝까지 순차적으로 읽는 방식
 * 조건과 상관없이 전체 데이터에 접근
