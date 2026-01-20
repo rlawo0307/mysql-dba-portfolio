@@ -93,6 +93,11 @@ filtered        : 10.00
 Extra           : Using where
 ```
 ## Index Lookup
+* Index Lookup이란?
+    * 인덱스를 이용해 필요한 row 위치를 찾는 접근 방식
+    * 특정 값으로 인덱스를 타고 바로 점프
+    * `type = range / ref / eq_ref / const` 등
+    * **Index Lookup ≠ Back Lookup** 
 ```sql
 create index idx1 on t1(c1);
 explain select * from t1 where c1 = 10;
@@ -109,7 +114,7 @@ key_len         : 5 -- int(4 bytes) + NULL 플래그(1 byte)
 ref             : const -- 인덱스와 상수를 비교
 rows            : 1 -- 1개의 row를 읽음 (추정)
 filtered        : 100.00
-Extra           : Using index -- covering index 사용
+Extra           : Using index
 ```
 * `filtered`의 값이 10.00 → 100.00 으로 변함
     * 인덱스에서 where 조건을 만족하는 row를 걸렀음을 의미
