@@ -4,26 +4,22 @@
 * 테이블 접근 순서, 인덱스 사용 여부, 예상 읽는 행(row) 수 등을 알 수 있음
 * 쿼리를 실제로 실행하지 않고 실행 계획만 확인할 수 있음
 * 종류
-    * `EXPAIN`
-        * 기본 실행 계획 확인
-    * `EXPLAIN ANALYZE`
-        * 실제 실행까지 하면서 자세한 실행 시간과 행 처리 정보 제공
-    * `EXPLAIN FORMAT=JSON`
-        * JSON 포맷으로 상세한 실행 계획 확인
+    * `EXPAIN` : 기본 실행 계획 확인
+    * `EXPLAIN ANALYZE` : 실제 실행까지 하면서 자세한 실행 시간과 행 처리 정보 제공
+    * `EXPLAIN FORMAT=JSON` : JSON 포맷으로 상세한 실행 계획 확인
 <br>
 
-# EXPLAIN 결과 컬럼
+### EXPLAIN 결과 컬럼
 * id
     * 쿼리 내 `select` 단위의 실행 순서
     * 보통 값이 작을수록 먼저 실행
     * 단일 쿼리는 보통 `1`
-* select_type
-    * select의 종류
-        * `SIMPLE` : 서브쿼리 없는 단순 select
-        * `PRIMARY` : 최상위 select
-        * `SUBQUERY` : where 절 안의 서브쿼리
-        * `DERIVED` : from 절의 서브쿼리 (임시 테이블)
-        * `UNION` : union의 두 번째 이후 select
+* select_type (select의 종류)
+    * `SIMPLE` : 서브쿼리 없는 단순 select
+    * `PRIMARY` : 최상위 select
+    * `SUBQUERY` : where 절 안의 서브쿼리
+    * `DERIVED` : from 절의 서브쿼리 (임시 테이블)
+    * `UNION` : union의 두 번째 이후 select
 * table
     * 접근 대상 테이블 명
     * 서브쿼리나 derived table이면 별칭으로 표시
@@ -73,3 +69,33 @@
         * `Using index condition` : ICP 적용
         * `Backward index scan` : 인덱스 역순 스캔
 <br>
+
+# EXPLAIN ANLAYZE
+* 쿼리를 실제로 실행한 후, 옵티마이저의 실행 계획과 실제 실행 결과를 함께 보여주는 명령
+* 실행 계획이 실제로 어떻게 동작했는지 검증하는 용도로 사용
+* **쿼리를 실제로 실행하므로 대량 데이터 조회 시 주의 필요**
+### 출력 구조
+```sql
+[실행 노드]
+(cost=예상 비용, 예상 row 수)
+(actual time=실제 시간, 실제 row 수, 반복 횟수)
+```
+### 주요 항목
+* cost
+    * 옵티마이저가 계산한 cost
+    * 다른 실행 계획과 비교하기 위한 용도
+    * 낮을수록 유리하다고 판단
+* 예상 row 수
+    * 해당 노드에서 처리할 것으로 예상한 row 수
+    * 통계 정보 기반 추정치
+* actual time
+    * `첫 row 반환까지 걸린 시간`..`모든 row 처리 완료 시간`
+    * 첫 번째 값 → 사용자 체감 응답 속도
+    * 두 번째 값 → 전체 처리 비용 / 서버 부하
+    * 실행 시간은 Buffer Pool 상태, OS 캐시, 시스템 부하에 따라 달라질 수 있음
+* 실제 row 수
+    * 해당 노드에서 실제로 처리된 row 수
+    * 예상값과 큰 차이가 나면 통계 정보에 문제가 있거나 잘못된 실행 계획을 선택했을 가능성이 있음
+* loops
+    * 해당 노드가 몇 번 반복 실행되었는지 표현
+    * Nested Loop Join에서 특히 중요
