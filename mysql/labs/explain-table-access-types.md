@@ -7,6 +7,10 @@
 * 인덱스 접근 방식 비교
     * Covering index
     * Back Lookup
+    * 정말로 covering index가 더 빠를까?
+* 정렬 방식 비교 (order by)
+    * Index-Driven Sort
+    * Using filesort
 <br>
 
 # 테이블 접근 방식 비교
@@ -226,3 +230,164 @@ explain analyze select c1, c2 from t1 where c2 between 100000 and 200000;
 
 `Covering Index`의 경우, 조회에 필요한 모든 컬럼을 인덱스만으로 처리하므로 테이블 접근이 발생하지 않으며, 동일한 scan 조건에서도 훨씬 낮은 실행 시간으로 결과를 반환할 수 있다.
 <br>
+
+# 정렬 방식 비교 (ORDER BY)
+* Index-Driven Sort
+    * `인덱스`를 사용한 정렬
+    * 인덱스는 이미 정렬된 상태이므로 추가적인 작업이 필요하지 않음
+    * 인덱스 순서대로 읽으면 자동으로 정렬된 상태
+    * 발생 조건
+        * order by 컬럼들이 인덱스에 포함되어 있어야 함
+        * order by 순서와 인덱스 컬럼 순서가 일치해야 함
+        * 복합 인덱스에서 선행 컬럼에 범위 조건이 사용될 경우, 후행 컬럼들의 정렬이 깨짐
+            * 범위 조건 컬럼을 기준으로 여러 그룹으로 나뉨
+            * 후속 컬럼들은 각 그룹 내에서만 정렬되어 있음
+            * 전체 결과에 대해 정렬된 상태가 아니라서 추가 정렬 작업(`Using filesort`) 발생
+    * 성능 상 유리한 경우
+        * covering index인 경우
+        * LIMIT이 있는 경우
+* Using filesort
+    * 인덱스를 활용하지 못해서 MySQL이 `별도의 정렬 작업` 수행
+        * 메모리 또는 디스크 기반 정렬
+        * 필요 시, 임시 테이블 사용
+    * 대량 데이터일수록 비용이 많이 들고 느림
+    * 발생 조건
+        * order by 컬럼이 인덱스에 없는 경우
+        * order by와 where 조건이 인덱스 순서를 깨뜨릴 경우
+        * 복잡한 조합이나 함수가 포함된 order by
+## 기본 ORDER BY (`ASC`)
+* 인덱스를 전체 스캔(`index full scan`)하면서 이미 정렬된 인덱스 순서를 사용해 정렬 처리
+```sql
+create table t1 (c1 int, index idx1(c1));
+insert into t1 values (1), (2), (1), (3), (1);
+
+explain select * from t1 order by c1;
+```
+```sql
+id              : 1
+select_type     : SIMPLE
+table           : t1
+partitions      : NULL
+type            : index -- index full scan
+possible_keys   : NULL
+key             : idx1 -- 인덱스 사용
+key_len         : 5
+ref             : NULL
+rows            : 5
+filtered        : 100.00 
+Extra           : Using index
+```
+```sql
++------+
+| c1   |
++------+
+|    1 |
+|    1 |
+|    1 |
+|    2 |
+|    3 |
++------+
+5 rows in set (0.00 sec)
+```
+### +) 인덱스가 걸려있지 않은 컬럼이 추가되면 어떻게 될까?
+* 조회 컬럼이 `(c1, c2)`이므로 인덱스(`idx1`)만으로는 조회 불가
+* 인덱스를 사용하면 back lookup 발생
+* 옵티마이저는 인덱스보다 테이블을 전체 scan하는 것이 더 낫다고 판단
+```sql
+create table t2 (c1 int, c2 int, index idx1(c1));
+insert into t2 values (1, 100), (2, 200), (1, 150), (3, 300), (1, 400);
+
+explain select * from t2 order by c1;
+```
+```sql
+id              : 1
+select_type     : SIMPLE
+table           : t2
+partitions      : NULL
+type            : ALL -- full table scan
+possible_keys   : NULL
+key             : NULL -- 실제로 인덱스를 사용하지 않음
+key_len         : NULL
+ref             : NULL
+rows            : 5
+filtered        : 100.00 
+Extra           : Using filesort -- MySQL이 별도의 정렬 작업 수행
+```
+* 참고) `possible_keys=NULL` 인 이유?
+    * 인덱스가 있는데 단지 사용하지 않은 거라면 possible_keys에 목록은 출력되어야 하지 않나?
+        * possible_keys는 where/join 조건을 기준으로 사용할 수 있는 인덱스 후보 목록을 출력
+        * order by 전용 인덱스는 표시되지 않을 수 있음
+## 역방향 ORDER BY (`DESC`)
+* InnoDB는 B+Tree를 역순으로 읽을 수 있음
+    * B+Tree의 leaf노드는 양방향 linked list로 연결되어 있음
+```sql
+explain select * from t1 order by c1 desc;
+```
+```sql
+id              : 1
+select_type     : SIMPLE
+table           : t1
+partitions      : NULL
+type            : index -- index full scan
+possible_keys   : NULL 
+key             : idx1 -- 인덱스 사용
+key_len         : 5
+ref             : NULL
+rows            : 5
+filtered        : 100.00 
+Extra           : Backward index scan; Using index -- filesort 안 생김
+```
+## WHERE + ORDER BY
+### 인덱스 순서를 지키는 경우 (정렬 유지)
+* `c1=1` 조건에서 인덱스 첫 컬럼을 `c1`으로 고정
+* 그 상태에서 `c2`는 이미 정렬되어 있음
+* 추가 정렬 필요 없음
+```sql
+create table t1 (c1 int, c2 int, index idx1(c1, c2));
+insert into t1 values (1, 100), (2, 200), (1, 150), (3, 300), (1, 400);
+
+explain select * from t1 where c1 = 1 order by c2;
+```
+```sql
+id              : 1
+select_type     : SIMPLE
+table           : t1
+partitions      : NULL
+type            : ref -- index lookup (Non Unique Index + `=` 조건)
+possible_keys   : idx1
+key             : idx1 -- 인덱스 사용
+key_len         : 5
+ref             : const
+rows            : 3
+filtered        : 100.00 
+Extra           : Using index -- filesort 안 생김
+```
+* 참고) `key_len=5` 인 이유?
+    * 복합 인덱스를 구성하는 컬럼 c1, c2가 모두 사용되었는데 왜 5인가?
+        * 인덱스 전체 크기 = c1(4) + c2(4) + null flag(1) = 9 byte
+        * `key_len`는 실제 옵티마이저가 사용한 인덱스 컬럼까지의 길이를 출력
+        * 즉, c1 컬럼까지만 사용되고 c2 컬럼은 사용되지 않음
+            * c1 컬럼까지만 탐색해도 조건 처리 및 정렬이 가능함
+### where 조건이 정렬을 깨는 경우
+* `c1>1` 범위 조건 때문에 인덱스는 `c1`까지 사용
+* 조건 결과 집합은 `c2` 기준으로 정렬되어 있지 않음
+    * 추가 정렬 작업은 `filesort` 사용
+```sql
+explain select * from t1 where c1 > 1 order by c2;
+```
+```sql
+id              : 1
+select_type     : SIMPLE
+table           : t1
+partitions      : NULL
+type            : range -- index range scan
+possible_keys   : idx1 -- where 조건을 처리할 수 있는 인덱스 후보
+key             : idx1 -- 인덱스 사용
+key_len         : 5 -- c1까지만 인덱스 사용, c2는 인덱스 탐색에 사용되지 않음
+ref             : NULL
+rows            : 2
+filtered        : 100.00 
+Extra           : Using where; Using index; Using filesort -- 인덱스 일부 사용, 정렬은 filesort 사용, back lookup 없음
+```
+## ORDER BY + LIMIT
+## Using temporary + using filesort
