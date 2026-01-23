@@ -390,4 +390,89 @@ filtered        : 100.00
 Extra           : Using where; Using index; Using filesort -- 인덱스 일부 사용, 정렬은 filesort 사용, back lookup 없음
 ```
 ## ORDER BY + LIMIT
-## Using temporary + using filesort
+* 참고) [→ limit에 대한 자세한 내용 보기](../limit.md)
+### limit을 사용하면 쿼리 수행 시간이 단축될까?
+#### order by 단독 사용 (limit 없음)
+* `idx1`이 있지만 c2를 위해 542241 번의 back lookup이 발생할 것으로 추정
+* 인덱스를 사용하는 것보다 테이블 전체 스캔 후 filesort가 더 싸다고 판단
+```sql
+create table t1 (c1 int, c2 int, index idx1(c1));
+insert into t1 select floor(rand()*100000), floor(rand()*100000) from information_schema.columns a cross join information_schema.columns b;
+select count(*) from t1; -- 543169 건 삽입
+
+explain select * from t1 order by c1;
+explain analyze select * from t1 order by c1;
+```
+```sql
+type = ALL
+key = NULL
+rows = 542241
+Extra = Using filesort
+```
+```sql
+| -> Sort: t1.c1  (cost=54537 rows=542241) (actual time=396..413 rows=543169 loops=1)
+    -> Table scan on t1  (cost=54537 rows=542241) (actual time=0.0237..203 rows=543169 loops=1)
+ |
+```
+#### order by + limit
+* 인덱스를 사용하여 정렬
+* `type=index`이지만 index full scan이 아닌 10건의 row만 읽고 조기 종료
+* `limit` 자체가 빠른것이 아니라, 전체 정렬을 하지 않아도 되는 상황이 발생한 것
+```sql
+explain select * from t1 order by c1 limit 10;
+explain analyze select * from t1 order by c1 limit 10;
+```
+```sql
+type = index
+key = idx1
+rows = 10
+Extra = NULL
+```
+```sql
+| -> Limit: 10 row(s)  (cost=0.00579 rows=10) (actual time=0.0781..0.145 rows=10 loops=1)
+    -> Index scan on t1 using idx1  (cost=0.00579 rows=10) (actual time=0.0773..0.143 rows=10 loops=1)
+ |
+```
+* order by를 단독 사용한 경우와 비교했을 때 `actual time`이 현저하게 감소한 것을 볼 수 있음
+    * order by 단독 사용 actual time : `396..413`
+    * order by + limit actual time : `0.0781..0.145`
+### where 범위 조건이 있으면 어떻게 동작할까?
+#### 정렬 + where(range)
+* index range scan한 결과 자체가 이미 c1에 대해 정렬된 상태
+* 추가적인 정렬 필요 없음
+```sql
+explain select * from t1 where c1 < 10 order by c1;
+explain analyze select * from t1 where c1 < 10 order by c1;
+```
+```sql
+type = range
+key = idx1
+rows = 58
+Extra = Using index condition -- ICP : 인덱스 레벨에서 조건 필터링
+```
+```sql
+| -> Index range scan on t1 using idx1 over (NULL < c1 < 10), with index condition: (t1.c1 < 10)  (cost=26.4 rows=58) (actual time=0.0581..0.353 rows=58 loops=1)
+ |
+ ```
+#### 정렬 + where(range) + limit
+* index range scan을 시작하여 필요한 row 10건을 읽으면 조기 종료
+```sql
+explain select * from t1 where c1 < 10 order by c1 limit 10;
+explain analyze select * from t1 where c1 < 10 order by c1 limit 10;
+```
+```sql
+type = range
+key = idx1
+rows = 58
+Extra = Using index condition
+```
+```sql
+| -> Limit: 10 row(s)  (cost=26.4 rows=10) (actual time=0.107..0.148 rows=10 loops=1)
+    -> Index range scan on t1 using idx1 over (NULL < c1 < 10), with index condition: (t1.c1 < 10)  (cost=26.4 rows=58) (actual time=0.106..0.146 rows=10 loops=1)
+ |
+```
+* `limit`을 함께 사용한 경우 `actual time`의 종료시간이 더 빠름
+    * limit 미사용 actual time : `0.0581..0.353`
+    * limit 사용 actual time : `0.107..0.148`
+* limit이 있는 케이스가 첫 row는 늦게 나옴
+    * limit이 항상 더 빠른 첫 응답을 보장하는 것은 아님
