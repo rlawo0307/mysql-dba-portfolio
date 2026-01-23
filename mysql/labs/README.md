@@ -6,6 +6,8 @@
 
 ## 범위
 이 디렉터리의 실습은 다음을 포함합니다.
+* MySQL 사용자 계정과 호스트 매칭 이해 실습 - [mysql-user-host-matching.md](mysql-user-host-matching.md)
+* MySQL 쿼리 실행 계획 이해 (기본) - [explain-table-access-types.md](explain-table-access-types.md)
 
 ## 주의 사항
 본 실습에는 보안상 위험한 설정이 일부 포함되어 있으며, **운영 환경에서는 절대 그대로 적용해서는 안 됩니다.**

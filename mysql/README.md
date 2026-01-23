@@ -8,10 +8,15 @@
 
 ## 범위
 본 섹션에서는 다음과 같은 MySQL DBA 주요 업무를 다룹니다.
-* MySQL 설치 및 초기 설정 - `installation.md`
-* 데이터베이스 관리 - `database-basic-operations.md`
-* 사용자 및 권한 관리 - `user-and-privilege-basics.md`
-* 테이블 스키마 설계 및 관리 - `table-schema-basics.md`
+* MySQL 설치 및 초기 설정 - [installation.md](installation.md)
+* 데이터베이스 관리 - [database-basic-operations.md](database-basic-operations.md)
+* 사용자 및 권한 관리 - [user-and-privilege-basics.md](user-and-privilege-basics.md)
+* 테이블 스키마 설계 및 관리 - [table-schema-basics.md](table-schema-basics.md)
+* 데이터 타입 - [data-types-theory.md](data-types-theory.md)
+* 제약조건 - [constraint-theory.md](constraint-theory.md)
+* 인덱스 기본 - [index-basics.md](index-basics.md)
+* 실행 계획 이해 - [explain.md](explain.md)
+* LIMIT 쿼리 이해 - [limit.md](limit.md)
 * 백업 및 복구 전략
 * 성능 튜닝
 * 기본 모니터링 및 상태 진단
