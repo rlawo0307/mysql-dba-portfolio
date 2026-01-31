@@ -7,6 +7,8 @@
     * `EXPAIN` : 기본 실행 계획 확인
     * `EXPLAIN ANALYZE` : 실제 실행까지 하면서 자세한 실행 시간과 행 처리 정보 제공
     * `EXPLAIN FORMAT=JSON` : JSON 포맷으로 상세한 실행 계획 확인
+* 참고)
+    * [→ 옵티마이저와 통계정보에 대한 내용 자세히 보기](optimizer-statistics.md)
 <br>
 
 ### EXPLAIN 결과 컬럼

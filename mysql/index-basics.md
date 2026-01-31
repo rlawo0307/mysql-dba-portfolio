@@ -330,22 +330,7 @@ set global innodb_adaptive_hash_index = OFF;
 
 # OPTIMIZER와 SCAN 방식
 ### Optimizer란?
-* SQL을 어떻게 실행할지 결정하는 MySQL의 핵심 컴포넌트
-    * InnoDB는 `Cost-Based-Optimizer(CBO)` 사용
-* 여러 실행 계획 후보 중 가장 cost가 낮다고 판단되는 계획을 선택
-* scan 방식 외에 join 순서, join 방식, 조건 평가 순서 등 쿼리 실행 전체 전략을 결정
-* SQL 실행 결과는 항상 동일하며 성능에 차이가 있음
-* 옵티마이저의 비용 계산은 **통계 정보를 기반으로 한 추정값**임
-* 옵티마이저의 비용 계산 기준
-    * 예상 읽기 row 수
-        * selectivity (선택도)
-        * cardinality (카디널리티)
-    * I/O 비용
-        * 디스크 페이지 접근 횟수
-        * 테이블 페이지 vs 인덱스 페이지
-    * CPU 비용
-        * 조건 비교, 정렬, 집계 연산 등
-    * Back Lookup 비용
+* [→ 옵티마이저와 통계정보에 대한 내용 자세히 보기](optimizer-statistics.md)
 ### 그렇다면 Index Scan이 항상 빠를까?
 * index scan이 항상 table full scan보다 빠른 것은 아님
 * 옵티마이저는 table scan과 index scan을 모두 후보로 두고 cost을 비교
