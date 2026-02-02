@@ -6,10 +6,44 @@
 
 # INDEX를 타지 않는 쿼리 패턴
 * 인덱스가 존재하더라도 MySQL 옵티마이저가 인덱스를 사용할 수 없거나, 아예 후보에서 제외하는 쿼리 패턴
+* 단순히 인덱스를 사용하여 쿼리를 수행한 것이 아닌, **조건 기반 인덱스 탐색이 이루어 진 경우**를 말함
+* 인덱스를 타는 경우
+    * Index Lookup (`ref`, `eq_ref`, `const`)
+    * Index Range Scan (`range`)
+* 인덱스를 타지 않는 경우
+    * Table Full Scan (`ALL`)
+    * Index Full Scan (`index`)
+        * 인덱스를 사용한 full scan일뿐, 조건 기반 인덱스 탐색을 실패한 결과임
 ## 컬럼 값이 변형된 경우
-### 컬럼에 함수 사용
-### 타입 불일치(암시적 형 변환)
-### 산술 연산
+* 인덱스에는 저장된 값 그대로 정렬되어 있음
+* 컬럼 값이 변형되는 순간 B-Tree 탐색 불가
+### 1. 컬럼에 함수를 사용한 경우
+* 컬럼에 함수가 적용되면 인덱스 정렬 기준과 비교 기준이 달라짐
+* B-Tree 탐색 시작 지점을 계산할 수 없음
+* `table/index full scan`이 선택됨
+#### 1) 문자열 함수 - `lower` / `upper`
+```sql
+set session cte_max_recursion_depth = 500000;
+
+create table t1(c1 varchar(100), index idx1(c1));
+insert into t1 with recursive seq as (select 1 as n union all select n+1 from seq where n < 500000) select concat('val_', n) from seq;
+insert into t1 values ('aaa');
+
+explain select * from t1 where lower(c1) = 'aaa'; -- type=index
+```
+* 해결 방법 1) 저장할 때 소문자/대문자로 저장
+    * 처음부터 비교 상황을 고려하여 적절한 형태로 저장
+* 해결 방법 2) 대소문자 구분 없는 `collation` 사용
+    * 컬럼 정의에 설정된 collation과 완전히 동일해야 함
+```sql
+show full columns from t1; -- Collation : utf8mb4_0900_ai_ci
+```
+```sql
+explain select * from t1 where c1 collate utf8mb4_0900_ai_ci = 'aaa'; -- type=ref
+```
+### 2. 타입 불일치 (암시적 형 변환)
+[→ 암시적 형 변환에 대한 내용 자세히 보기](../implicit-type-conversion.md)
+### 3. 산술 연산
 ## 인덱스 탐색 시작 지점을 특정할 수 없는 경우
 ### 잘못된 LIKE 패턴
 ### 복합 인덱스 선두 컬럼 미사용
