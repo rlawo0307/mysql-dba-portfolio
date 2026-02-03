@@ -18,6 +18,8 @@
 * 실행 계획 이해 - [explain.md](explain.md)
 * LIMIT 쿼리 이해 - [limit.md](limit.md)
 * 옵티마이저와 통계정보 - [optimizer-statistics.md](optimizer-statistics.md)
+* 암시적 형 변환 - [implicit-type-conversion.md](implicit-type-conversion.md)
+* 인덱스를 타지 않는 쿼리 패턴 - [index-antipatterns.md](index-antipatterns.md)
 * 백업 및 복구 전략
 * 성능 튜닝
 * 기본 모니터링 및 상태 진단
