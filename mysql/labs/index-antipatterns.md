@@ -21,26 +21,73 @@
 * 컬럼에 함수가 적용되면 인덱스 정렬 기준과 비교 기준이 달라짐
 * B-Tree 탐색 시작 지점을 계산할 수 없음
 * `table/index full scan`이 선택됨
+* **기본적으로 저장할 때 비교 상황을 고려하여 적절한 형태로 저장해서 해결 할 수 있음**
 #### 1) 문자열 함수 - `lower` / `upper`
+* 해결 방법) 대소문자 구분 없는 `collation` 사용
+    * 컬럼 정의에 설정된 collation과 완전히 동일해야 함
 ```sql
 set session cte_max_recursion_depth = 500000;
 
 create table t1(c1 varchar(100), index idx1(c1));
-insert into t1 with recursive seq as (select 1 as n union all select n+1 from seq where n < 500000) select concat('val_', n) from seq;
+insert into t1 with recursive seq as
+(
+    select 1 as n union all select n+1 from seq where n < 500000
+) select concat('val_', n) from seq;
 insert into t1 values ('aaa');
 
-explain select * from t1 where lower(c1) = 'aaa'; -- type=index
+explain select * from t1 where lower(c1) = 'aaa'; -- type=index, key=idx1
 ```
-* 해결 방법 1) 저장할 때 소문자/대문자로 저장
-    * 처음부터 비교 상황을 고려하여 적절한 형태로 저장
-* 해결 방법 2) 대소문자 구분 없는 `collation` 사용
-    * 컬럼 정의에 설정된 collation과 완전히 동일해야 함
 ```sql
 show full columns from t1; -- Collation : utf8mb4_0900_ai_ci
+explain select * from t1 where c1 collate utf8mb4_0900_ai_ci = 'aaa'; -- type=ref, key=idx1
+```
+#### 2) 문자열 함수 - `trim` / `ltrim` / `rtrim`
+* 해결 방법) `generated column`을 생성하여 해당 컬럼에 인덱스 생성
+    * 테이블에 실제로 저장되거나 계산 시점에 자동으로 만들어지는 가상의 컬럼
+    * 기본적으로 다른 컬럼의 값을 기반으로 계산된 결과를 저장하는 컬럼
+    * 직접 값을 넣지 않아도 MySQL이 자동으로 값을 생성해줌
+    * 종류
+        * `Stored Generated Column`
+            * 계산 결과를 테이블에 실제 저장
+            * 인덱스 생성 가능
+        * `Virtual Generated Column`
+            * 계산 결과를 저장하지 않고 조회 시점에 계산
+            * 인덱스 생성 불가
+```sql
+create table t1(c1 varchar(100), index idx1(c1));
+explain select * from t1 where trim(c1) = 'aaa'; -- type=index, key=idx1
 ```
 ```sql
-explain select * from t1 where c1 collate utf8mb4_0900_ai_ci = 'aaa'; -- type=ref
+alter table t1 add gc1 varchar(100) generated always as (trim(c1)) stored;
+alter table t1 add index idx2(gc1);
+explain select * from t1 where gc1 = 'aaa'; -- type=ref, key=idx2
 ```
+#### 3) 문자열 함수 - `substring` / `substr` / `left` / `right`
+* 해결 방법 1) 범위 조건 사용
+* 해결 방법 2) `like` 사용
+* 해결 방법 3) `generated column`을 생성하여 해당 컬럼에 인덱스 생성
+    * 원본 컬럼의 prefix를 generated column으로 생성
+```sql
+set session cte_max_recursion_depth = 500000;
+
+create table t1(c1 varchar(100), index idx1(c1));
+insert into t1 with recursive seq as
+(
+    select 1 as n union all select n+1 from seq where n < 500000
+) select concat('val_', n) from seq;
+insert into t1 values ('aaa');
+
+explain select * from t1 where substr(c1, 1, 3) = 'aaa'; -- type=index, key=idx1
+```
+```sql
+explain select * from t1 where c1 >= 'aaa' and c1 < 'aaab'; -- type=range, key=idx1
+explain select * from t1 where c1 like 'aaa%'; -- type=range, key=idx1
+
+alter table t1 add gc1 varchar(100) generated always as (substr(c1, 1, 3)) stored;
+alter table t1 add index idx2(gc1);
+explain select * from t1 where gc1 = 'aaa'; -- type=ref, key=idx2
+```
+
 ### 2. 타입 불일치 (암시적 형 변환)
 [→ 암시적 형 변환에 대한 내용 자세히 보기](../implicit-type-conversion.md)
 ### 3. 산술 연산
