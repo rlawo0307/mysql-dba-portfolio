@@ -336,7 +336,7 @@ set global innodb_adaptive_hash_index = OFF;
 * 옵티마이저는 table scan과 index scan을 모두 후보로 두고 cost을 비교
 * **index scan을 선택하지 않는 경우**
     * 조건에 인덱스 컬럼이 사용되지 않은 경우
-    * 조건을 인덱스로 사용할 수 없는 형태로 작성한 경우 [→ 인덱스를 타지 않는 패턴 자세히 보기](labs/index-antipatterns.md)
+    * 조건을 인덱스로 사용할 수 없는 형태로 작성한 경우 [→ 인덱스를 타지 않는 패턴 자세히 보기](index-antipatterns.md)
         * 함수 사용
         * 암시적 형 변환
         * 산술 연산
