@@ -15,12 +15,12 @@ create table 테이블명 (
 * 컬럼명 (column name)
     * 테이블 내에서 유일해야 함
     * 명확하고 의미 있는 이름 사용 권장
-* 자료형 (data type) [→ 각 자료형에 대한 자세한 내용 보기](data-types-theory.md)
+* 자료형 (data type) [→ 각 자료형에 대한 자세한 내용 보기](../data-types-theory.md)
     * 숫자형 : `INT`, `BIGINT`, `FLOAT`, `DOUBLE`, `DECIMAL`, `BOOLEAN`
     * 문자형 : `CHAR(n)`, `VARCHAR(n)`, `TEXT`
     * 날짜 / 시간형 : `DATE`, `DATETIME`, `TIMESTAMP`, `TIME`, `YEAR`
     * 바이너리 : `BLOB`
-* 제약조건 (constraints) [→ 각 제약조건에 대한 자세한 내용 보기](constraint-theory.md)
+* 제약조건 (constraints) [→ 각 제약조건에 대한 자세한 내용 보기](../constraint-theory.md)
     * `primary key`
     * `default`
     * `not null`
