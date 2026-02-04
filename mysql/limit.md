@@ -26,6 +26,8 @@ limit row_count
 limit offset row_count
 ```
 * 앞의 `offset`만큼은 버리고 그 다음 `row_count`건을 반환
+* offset을 지정하지 않으면 0
+* offset 값이 음수면 오류 발생
 * `offset`이 클수록 선형적으로 느려짐
 <br>
 

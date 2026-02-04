@@ -14,5 +14,15 @@
 * 주요 명령어 : `CREATE`, `ALTER`, `DROP`, `TRUNCATE`
 * [→ DDL에 대한 내용 자세히 보기](sql-ddl.md)
 # DML
+* DML = Data Manipulation Language
+* 데이터베이스 내에 저장된 데이터를 조작하는 명령어
+* 주요 명령어 : `SELECT`, `INSERT`, `UPDATE`, `DELETE`
+* [→ DML에 대한 내용 자세히 보기](sql-dml.md)
+### CRUD란?
+* 데이터베이스나 애플리케이션에서 데이터를 다루는 기본적인 4가지 작업
+* 주요 작업 : `Create`, `Read`, `Update`, `Delete`
+* **`CRUD`와 `DML`의 연관성**
+    * CRUD = 개념적인 데이터 조작 작업의 분류
+    * DML = CRUD 작업을 수행하는 실제 SQL 명령어
 # DCL
 # TCL
