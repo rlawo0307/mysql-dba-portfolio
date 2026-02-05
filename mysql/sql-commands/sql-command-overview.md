@@ -13,6 +13,8 @@
 * 데이터베이스의 구조를 정의하고 변경하는 명령어
 * 주요 명령어 : `CREATE`, `ALTER`, `DROP`, `TRUNCATE`
 * [→ DDL에 대한 내용 자세히 보기](sql-ddl.md)
+<br>
+
 # DML
 * DML = Data Manipulation Language
 * 데이터베이스 내에 저장된 데이터를 조작하는 명령어
@@ -24,9 +26,17 @@
 * **`CRUD`와 `DML`의 연관성**
     * CRUD = 개념적인 데이터 조작 작업의 분류
     * DML = CRUD 작업을 수행하는 실제 SQL 명령어
+<br>
+
 # DCL
 * DCL = Data Control Language
 * 데이터에 대한 접근 권한과 보안을 관리하는 명령어
 * 주요 명령어 : `GRANT`, `REVOKE`
 * [→ DCL에 대한 내용 자세히 보기](sql-dcl.md)
+<br>
+
 # TCL
+* TCL = Transcation Control Language
+* 트랜잭션을 제어하는 명령어
+* 주요 명령어 : `START TRANSACTION`, `COMMIT`, `ROLLBACK`, `SAVEPOINT`, `ROLLBACK TO SAVEPOINT`, `RELEASE SAVEPOINT`, `SET AUTOCOMMIT`
+* [→ TCL에 대한 내용 자세히 보기](sql-tcl.md)
