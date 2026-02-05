@@ -25,4 +25,8 @@
     * CRUD = 개념적인 데이터 조작 작업의 분류
     * DML = CRUD 작업을 수행하는 실제 SQL 명령어
 # DCL
+* DCL = Data Control Language
+* 데이터에 대한 접근 권한과 보안을 관리하는 명령어
+* 주요 명령어 : `GRANT`, `REVOKE`
+* [→ DCL에 대한 내용 자세히 보기](sql-dcl.md)
 # TCL
