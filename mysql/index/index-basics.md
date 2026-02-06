@@ -192,8 +192,8 @@ set global innodb_adaptive_hash_index = OFF;
  <br>
 
 # FUll TABLE SCAN vs INDEX SCAN
-* [→ 각 scan 방식에 대한 실행 계획 자세히 보기 (기본)](labs/explain-table-access-types.md)
-* [→ 각 scan 방식에 대한 실행 계획 자세히 보기 (심화)](labs/explain-advanced-index-scan.md)
+* [→ 각 scan 방식에 대한 실행 계획 자세히 보기 (기본)](../labs/explain-table-access-types.md)
+* [→ 각 scan 방식에 대한 실행 계획 자세히 보기 (심화)](../labs/explain-advanced-index-scan.md)
 
 ## Full Table Scan
 * 테이블의 모든 row를 처음부터 끝까지 순차적으로 읽는 방식
@@ -330,13 +330,13 @@ set global innodb_adaptive_hash_index = OFF;
 
 # OPTIMIZER와 SCAN 방식
 ### Optimizer란?
-* [→ 옵티마이저와 통계정보에 대한 내용 자세히 보기](optimizer-statistics.md)
+* [→ 옵티마이저와 통계정보에 대한 내용 자세히 보기](../optimization/optimizer-statistics.md)
 ### 그렇다면 Index Scan이 항상 빠를까?
 * index scan이 항상 table full scan보다 빠른 것은 아님
 * 옵티마이저는 table scan과 index scan을 모두 후보로 두고 cost을 비교
 * **index scan을 선택하지 않는 경우**
     * 조건에 인덱스 컬럼이 사용되지 않은 경우
-    * 조건을 인덱스로 사용할 수 없는 형태로 작성한 경우 [→ 인덱스를 타지 않는 패턴 자세히 보기](index-antipatterns.md)
+    * 조건을 인덱스로 사용할 수 없는 형태로 작성한 경우 [→ 인덱스를 타지 않는 패턴 자세히 보기](../index/index-antipatterns.md)
         * 함수 사용
         * 암시적 형 변환
         * 산술 연산

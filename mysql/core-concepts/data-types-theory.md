@@ -63,7 +63,7 @@ insert into t1 values (0.1+0.2, 0.1+0.2);
 ```sql
 select * from t1;
 ```
-```
+```sql
 +------+------+
 | c1   | c2   |
 +------+------+
@@ -79,7 +79,7 @@ select * from t1;
 ```sql
 select format(c1, 20) as c1_fmt, format(c2, 20) as c2_fmt from t1;
 ```
-```
+```sql
 +------------------------+------------------------+
 | c1_fmt                 | c2_fmt                 |
 +------------------------+------------------------+
@@ -103,7 +103,7 @@ insert into t2(d) select 0.1 from information_schema.columns limit 1000;
 ```sql
 select sum(d) as sum_double, sum(d) - 73.7 as double_diff from t2;
 ```
-```
+```sql
 +-------------------+---------------------------------+
 | sum_double        | double_diff                     |
 +-------------------+---------------------------------+
@@ -142,7 +142,7 @@ insert into t1 values (9999.99); -- ERROR 1264
 ```sql
 select * from t1;
 ```
-```
+```sql
 +--------+
 | c1     |
 +--------+
@@ -256,7 +256,7 @@ create table t1 (c1 char(10), idx int);
 insert into t1 values ('abc', 1), ('abc ', 2);
 select * from t1 where c1 = 'abc';
 ```
-```
+```sql
 +------+------+
 | c1   | idx  |
 +------+------+

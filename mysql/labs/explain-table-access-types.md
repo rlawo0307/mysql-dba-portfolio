@@ -14,8 +14,8 @@
 <br>
 
 # 테이블 접근 방식 비교
-* [→ explain에 대한 자세한 내용 보기](../explain.md)
-* [→ 각 scan 방식에 대한 개념 자세히 보기](../index-basics.md)
+* [→ explain에 대한 자세한 내용 보기](../optimization/explain.md)
+* [→ 각 scan 방식에 대한 개념 자세히 보기](../index/index-basics.md)
 ## Full Table Scan
 * 테이블의 모든 행을 처음부터 끝까지 읽는 방식
 * 인덱스를 사용하지 않고 테이블을 통째로 탐색
@@ -112,7 +112,7 @@ Extra           : Using index condition -- where 조건이 인덱스 스캔 단�
 <br>
 
 # 인덱스 접근 방식 비교
-* [→ explain에 대한 자세한 내용 보기](../explain.md)
+* [→ explain에 대한 자세한 내용 보기](../optimization/explain.md)
 ## Back Lookup
 * secondary index로 row 위치를 찾은 후, pk를 이용해 테이블에서 실제 데이터를 조회하는 방식
 * 인덱스에 없는 컬럼을 조회할 때 발생
@@ -177,7 +177,7 @@ Extra           : Using index -- covering index 사용
 * 조회에 필요한 모든 컬럼이 인덱스에 존재하므로 테이블 접근 불필요 → `covering index` 사용
 ## 정말로 covering index가 더 빠를까?
 * 실제 많은 데이터를 삽입한 후 조회 쿼리에서 성능 차이가 나는지 확인해보자
-* [→ explain analyze 에 대한 자세한 내용 보기](../explain.md)
+* [→ explain analyze 에 대한 자세한 내용 보기](../optimization/explain.md)
 ### 데이터 삽입
 ```sql
 set session cte_max_recursion_depth = 500000; -- 재귀의 최대 반복 횟수 설정
@@ -391,7 +391,7 @@ filtered        : 100.00
 Extra           : Using where; Using index; Using filesort -- 인덱스 일부 사용, 정렬은 filesort 사용, back lookup 없음
 ```
 ## ORDER BY + LIMIT
-* [→ limit에 대한 자세한 내용 보기](../limit.md)
+* [→ limit에 대한 자세한 내용 보기](../optimization/limit.md)
 ### limit을 사용하면 쿼리 수행 시간이 단축될까?
 #### order by 단독 사용 (limit 없음)
 * `idx1`이 있지만 c2를 위해 542241 번의 back lookup이 발생할 것으로 추정

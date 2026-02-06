@@ -190,7 +190,7 @@ where table_name = 't1';
 ```
 * MySQL은 같은 컬럼에 이름이 다른 인덱스 생성 가능
     * 그럼 실제 index scan 시 어떤 인덱스를 사용할까?
-        * 그건 옵티마이저 판단 [→ 옵티마이저와 통계정보에 대한 내용 자세히 보기](optimizer-statistics.md)
+        * 그건 옵티마이저 판단 [→ 옵티마이저와 통계정보에 대한 내용 자세히 보기](../optimization/optimizer-statistics.md)
         * `EXPLAIN` 으로 확인 가능
         * 쓰기 작업 시 모든 인덱스가 갱신되므로 성능 저하를 유발할 수 있음
 ### unique 제약 삭제

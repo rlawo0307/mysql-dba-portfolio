@@ -58,7 +58,7 @@ select 컬럼명1, 컬럼명2, ...
         * order by는 이미 집계가 끝난 상태의 결과 컬럼들을 대상으로 정렬 수행
 * limit 절
     * 결과 개수 제한 및 offset 지정
-    * [→ limit에 대한 내용 자세히 보기](../limit.md)
+    * [→ limit에 대한 내용 자세히 보기](../optimization/limit.md)
 <br>
 
 # 데이터 삽입 (INSERT)
@@ -71,7 +71,7 @@ insert [options] into 테이블명 [(컬럼명1, 컬럼명2, ...), ...] values (
     * `auto_increment` 컬럼일 경우, 자동으로 1씩 증가하는 값이 할당됨
 * 삽입하려는 컬럼의 자료형과 값이 일치해야 함
 * 제약조건을 반드시 충족해야 함
-    * [→ 각 제약조건에에 대한 내용 자세히 보기](../constraint-theory.md)
+    * [→ 각 제약조건에에 대한 내용 자세히 보기](../core-concepts/constraint-theory.md)
 * options
     * `ignore`
         * 기본적으로 중복 키 충돌 발생 시 오류가 나면서 쿼리가 중단됨

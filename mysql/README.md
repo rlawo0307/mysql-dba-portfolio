@@ -6,20 +6,25 @@
 
 각 항목은 실제 설정 변경, 명령어 실행, 결과 확인을 기반으로 구성되며, 운영 안정성과 유지보수 관점에서 설명할 예정입니다.
 
-## 범위
-본 섹션에서는 다음과 같은 MySQL DBA 주요 업무를 다룹니다.
-* MySQL 설치 및 초기 설정 - [installation.md](installation.md)
-* 데이터베이스 관리 - [database-basic-operations.md](database-basic-operations.md)
-* 사용자 및 권한 관리 - [user-and-privilege-basics.md](user-and-privilege-basics.md)
-* 테이블 스키마 설계 및 관리 - [table-schema-basics.md](table-schema-basics.md)
-* 데이터 타입 - [data-types-theory.md](data-types-theory.md)
-* 제약조건 - [constraint-theory.md](constraint-theory.md)
-* 인덱스 기본 - [index-basics.md](index-basics.md)
-* 실행 계획 이해 - [explain.md](explain.md)
+## 폴더 구성
+### administration
+* MySQL 설치 및 초기 설정 - [installation.md](administration/installation.md)
+* 사용자 관리 - [user-account.md](administration/user-account.md)
+* 데이터베이스 관리 - [database-basic-operations.md](administration/database-basic-operations.md)
+### core-concepts
+* 데이터 타입 - [data-types-theory.md](core-concepts/data-types-theory.md)
+* 제약조건 - [constraint-theory.md](core-concepts/constraint-theory.md)
+### optimization
+* 옵티마이저와 통계정보 - [optimizer-statistics.md](optimization/optimizer-statistics.md)
+* 실행 계획 이해 - [explain.md](optimization/explain.md)
+* 암시적 형 변환 - [implicit-type-conversion.md](optimization/implicit-type-conversion.md)
 * LIMIT 쿼리 이해 - [limit.md](limit.md)
-* 옵티마이저와 통계정보 - [optimizer-statistics.md](optimizer-statistics.md)
-* 암시적 형 변환 - [implicit-type-conversion.md](implicit-type-conversion.md)
-* 인덱스를 타지 않는 쿼리 패턴 - [index-antipatterns.md](index-antipatterns.md)
-* 백업 및 복구 전략
-* 성능 튜닝
-* 기본 모니터링 및 상태 진단
+### index
+* 인덱스 기본 - [index-basics.md](index/index-basics.md)
+* 인덱스를 타지 않는 쿼리 패턴 - [index-antipatterns.md](index/index-antipatterns.md)
+### sql-commands
+* SQL 명령어 - [sql-command-overview.md](sql-commands/sql-command-overview.md)
+* DDL - [sql-ddl.md](sql-commands/sql-ddl.md)
+* DML - [sql-dml.md](sql-commands/sql-dml.md)
+* DCL - [sql-dcl.md](sql-commands/sql-dcl.md)
+* TCL - [sql-tcl.md](sql-commands/sql-tcl.md)

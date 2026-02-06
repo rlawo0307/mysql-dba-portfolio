@@ -32,4 +32,4 @@ limit offset row_count
 <br>
 
 # ORDER BY + LIMIT 실습
-[→ order by + limit 실습 내용 자세히 보기](labs/explain-table-access-types.md)
+[→ order by + limit 실습 내용 자세히 보기](../labs/explain-table-access-types.md)
