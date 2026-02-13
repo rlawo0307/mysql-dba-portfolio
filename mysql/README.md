@@ -15,6 +15,7 @@
 * 데이터 타입 - [data-types-theory.md](core-concepts/data-types-theory.md)
 * 제약조건 - [constraint-theory.md](core-concepts/constraint-theory.md)
 * MySQL 내장함수 - [builtin-functions.md](core-concepts/builtin-functions.md)
+* MySQL SQL Compiler Engine - [sql-compiler-engine.md](core-concepts/sql-compiler-engine.md)
 ### optimization
 * 옵티마이저와 통계정보 - [optimizer-statistics.md](optimization/optimizer-statistics.md)
 * 실행 계획 이해 - [explain.md](optimization/explain.md)
