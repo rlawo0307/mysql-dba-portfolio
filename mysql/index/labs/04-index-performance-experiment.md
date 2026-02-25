@@ -4,6 +4,9 @@
     * Secondary Index
     * Covering Index
 * 참고자료
+    * [→ explain에 대한 자세한 내용 보기](../../optimization/explain.md)
+    * [→ index 종류에 대한 자세한 내용 보기](../index-basics.md)
+    * [→ 각 scan 방식에 대한 개념 자세히 보기](../../index/index-basics.md)
 <br>
 
 # 인덱스 별 조회 성능 차이 분석
