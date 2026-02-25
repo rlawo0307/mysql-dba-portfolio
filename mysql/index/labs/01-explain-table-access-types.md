@@ -175,61 +175,6 @@ Extra           : Using index -- covering index 사용
     * `c1`은 pk 컬럼이며, 그 값 자체가 row를 식별하는 pk 값
     * `idx1`은 개념적으로 `(c2, c1)` 구조를 가짐
 * 조회에 필요한 모든 컬럼이 인덱스에 존재하므로 테이블 접근 불필요 → `covering index` 사용
-## 정말로 covering index가 더 빠를까?
-* 실제 많은 데이터를 삽입한 후 조회 쿼리에서 성능 차이가 나는지 확인해보자
-* [→ explain analyze 에 대한 자세한 내용 보기](../optimization/explain.md)
-### 데이터 삽입
-```sql
-set session cte_max_recursion_depth = 500000; -- 재귀의 최대 반복 횟수 설정
-
-insert into t1 with recursive seq as (select 1 as n union all select n+1 from seq where n < 500000) select n, n*10, n*100 from seq;
-```
-### 실행 결과 확인
-#### Back Lookup
-```sql
-explain analyze select * from t1 where c2 between 100000 and 200000;
-```
-```sql
-| -> Index range scan on t1 using idx1 over (100000 <= c2 <= 200000), with index condition: (t1.c2 between 100000 and 200000)  (cost=4501 rows=10001) (actual time=1.33..10.5 rows=10001 loops=1)
- |
-```
-* `Index range scan on t1 using idx1`
-    * idx1 인덱스를 사용하여 index range scan 수행
-* `over (100000 <= c2 <= 200000)`
-    * 인덱스 탐색 시작 지점 : 100000
-    * 인덱스 탐색 종료 지점 : 200000
-* `with index condition: (t1.c2 between 100000 and 200000)`
-    * ICP 적용
-    * where 조건이 인덱스 스캔 단계에서 처리됨
-#### Covering Index
-```sql
-explain analyze select c1, c2 from t1 where c2 between 100000 and 200000;
-```
-```sql
-| -> Filter: (t1.c2 between 100000 and 200000)  (cost=2003 rows=10001) (actual time=0.159..3.19 rows=10001 loops=1)
-    -> Covering index range scan on t1 using idx1 over (100000 <= c2 <= 200000)  (cost=2003 rows=10001) (actual time=0.157..2.61 rows=10001 loops=1)
- |
-```
-* `Covering index range scan on t1 using idx1`
-    * idx1을 covering index로 사용하여 index range scan 수행
-* 왜 ICP가 아닌 `Filter`로 나왔을까?
-    * `c2 between ...` 조건은 이미 index range scan의 범위 조건으로 처리됨
-    * Covering index이므로 추가적인 row 조건 평가나 테이블 접근이 필요 없음
-    * 이 경우, MySQL은 조건을 `with index condition`으로 표현하지 않고, 상위에 `Filter` 노드로 표현
-        * `Filter`는 형식 상 존재할 뿐, 비용 증가 없음
-        * 단, 결과 반환 오버헤드 존재
-* `range scan` 노드와 `Filter` 노드의 cost가 동일
-* actual time이 `0.157..2.61` 에서 `0.159..3.19`로 살짝 증가
-    * 결과 반환 오버헤드로 인한 시간 증가
-### 결과 비교
-* Back Lookup actual time : `1.33..10.5`
-* Covering Index actual time : `0.159..3.19`
-
-→ `actual time`을 비교해보면 전체 처리 완료 시간이 Covering Index가 약 3배 더 빠르게 측정되었다.
-### 결론
-`Back Lookup`의 경우, 인덱스 스캔 이후 조건에 만족하는 모든 row에 대해 pk를 사용하여 실제 데이터를 재탐색하는 과정이 추가된다. 이로 인해 대상 row 수가 많아질수록 테이블 랜덤 접근 비용이 누적되어 실행 시간이 증가한다.
-
-`Covering Index`의 경우, 조회에 필요한 모든 컬럼을 인덱스만으로 처리하므로 테이블 접근이 발생하지 않으며, 동일한 scan 조건에서도 훨씬 낮은 실행 시간으로 결과를 반환할 수 있다.
 <br>
 
 # 정렬 방식 비교 (ORDER BY)
