@@ -7,6 +7,7 @@
     * [→ explain에 대한 자세한 내용 보기](../../optimization/explain.md)
     * [→ index 종류에 대한 자세한 내용 보기](../index-basics.md)
     * [→ 각 scan 방식에 대한 개념 자세히 보기](../../index/index-basics.md)
+    * [→ index hint에 대한 개념 자세히 보기](../index-hint.md)
 <br>
 
 # 인덱스 구성에 따른 성능 비교
