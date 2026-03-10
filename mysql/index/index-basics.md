@@ -59,7 +59,14 @@
 * **InnoDB에서는 직접 생성 불가**
 * 필요한 경우 `Adaptive Hash Index(AHI)`를 내부적으로 사용
 ### Clustered Index
-* 테이블의 실제 데이터(row)가 pk 기준으로 정렬된 구조로 저장되는 인덱스
+* **테이블의 실제 데이터(row)가 pk 기준으로 정렬된 구조로 저장되는 인덱스**
+* leaf node 구조
+    * 모든 컬럼 데이터 (실제 row 데이터)
+    * trx_id
+        * 해당 row를 마지막으로 수정한 트랜잭션 ID
+    * roll_pointer
+        * undo log를 가리키는 포인터
+        * MVCC를 위한 정보 [→ MVCC에 대한 내용 자세히 보기](../transaction/transaction-mechanism.md)
 * 테이블 당 하나만 존재 가능
 * 구조 : `B+Tree` 구조
 * Secondary Index의 기준점 역할
@@ -72,9 +79,12 @@
     3. 내부적으로 생성한 row_id
 ### Secondary Index
 * Clustered Index 가 아닌 모든 인덱스
-* 실제 데이터가 아니라 pk 값을 저장하고 있는 인덱스
+* **실제 데이터가 아니라 pk 값을 저장하고 있는 인덱스**
     * pk가 길면 secondary index의 크기 증가
     * 전체 성능 저하를 유발할 수 있음
+* leaf node 구조
+    * 인덱스 키 값
+    * 해당 row의 pk 값
 * 테이블 당 여러 개 생성 가능
 * 구조 : `B+Tree` 구조
 * 동작 방식 (`Bookmark Lookup`/ `Back Lookup`)
