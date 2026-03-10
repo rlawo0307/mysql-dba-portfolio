@@ -50,6 +50,6 @@
 ## transaction
 * 트랜잭션 기본 개념 - [transaction-basics.md](transaction/transaction-basics.md)
 * 격리 수준 - [isolation-levels.md](transaction/isolation-levels.md)
-* InnoDB 트랜잭션 메커니즘 - [innodb-transaction-mechanism.md](transaction/innodb-transaction-mechanism.md)
+* 트랜잭션 메커니즘 - [transaction-mechanism.md](transaction/transaction-mechanism.md)
 * Locking - [locking.md](transaction/locking.md)
 * Deadlock - [deadlock.md](transaction/deadlock.md)
