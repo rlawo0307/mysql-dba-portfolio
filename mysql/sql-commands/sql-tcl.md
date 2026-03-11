@@ -92,7 +92,9 @@ commit; -- 쿼리1, 쿼리2만 커밋됨
 * 간접적으로 관리하는 방법
     * 애플리케이션 코드에서 savepoint 이름을 변수나 로그로 관리
     * 저장해둔 savepoint를 기반으로 `rollback to savepoint` 실행하기
-# 트랜잭션 자동 커밋 설정하기 (SET AUTOCOMMIT)
+<br><br>
+
+# 트랜잭션 자동 커밋 설정하기
 * 기본적으로 MySQL은 autocommit 모드
     * 각 SQL문이 실행될 때마다 자동으로 즉시 커밋됨
     * 한 개의 SQL문이 하나의 트랜잭션처럼 동작
@@ -102,12 +104,4 @@ commit; -- 쿼리1, 쿼리2만 커밋됨
 ```sql
 set autocommit = 0; -- off (트랜잭션 직접 제어)
 set autocommit = 1; -- on (자동 커밋)
-```
-## autocommit
-* MySQL은 기본적으로 autocommit 모드가 활성화 되어 있음
-* 각 SQL문이 하나의 트랜잭션으로 자동 커밋됨
-* autocommit을 비활성화 할 경우, 명시적으로 commit/rollback을 해야 함
-```sql
-set autocommit = 0; -- 비활성화
-set autocommit = 1; -- 활성화
 ```
