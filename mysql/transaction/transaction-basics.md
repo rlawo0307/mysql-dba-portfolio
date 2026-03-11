@@ -13,7 +13,7 @@
         * 그 결과는 전부 반영되거나 전부 취소되어야 함
         * 트랜잭션 내 모든 SQL문이 정상 수행되고 난 후 commit될 경우에만 변경 사항이 반영됨
         * 하나라도 실패하거나 rollback되면 모든 변경이 취소됨
-        * undo log로 구현
+        * undo log로 구현 [→ 트랜잭션 메커니즘에 대한 내용 자세히 보기](transaction-mechanism.md)
     * `Consistency`(일관성)
         * 트랜잭션 전후에 데이터베이스는 항상 정의된 규칙을 만족하는 상태로 유지되어야 함
         * 트랜잭션은 일관된 상태에서 시작하여
@@ -29,8 +29,7 @@
         * MVCC, lock을 통해 구현
     * `Durability`(영속성)
         * commit된 데이터는 시스템 장애가 발생해도 유지되어야 함
-        * redo log, checkpoint로 구현
-* [→ 트랜잭션 메커니즘에 대한 내용 자세히 보기](transaction-mechanism.md)
+        * redo log, checkpoint로 구현 [→ 트랜잭션 메커니즘에 대한 내용 자세히 보기](transaction-mechanism.md)
 <br><br>
 
 <center>
