@@ -3,6 +3,32 @@
 * InnoDB는 `row-level locking`을 지원
     * 테이블 전체가 아닌 개별 row 단위로 lock을 거는 방식
     * 실제로는 row가 아닌 index record를 lock
+## Lock 상태 [→ lock 상태 확인 실습](labs/lock-monitoring.md)
+```text
+lock 요청 → 충돌 없음 → Granted
+
+lock 요청 → 충돌 발생 → Waiting → Granted / Timeout / Deadlock
+```
+* `Granted`
+    * lock이 정상적으로 획득된 상태
+    * 트랜잭션이 lock을 얻어 해당 row에 대해 작업을 수행할 수 있는 상태
+    * 다른 트랜잭션이 같은 row에 접근하면 대기 상태(waiting)로 전환
+* `Waiting`
+    * 트랜잭션이 lock을 요청했지만 다른 트랜잭션이 이미 보유 중인 상태
+    * 대기 상태는 다음 중 하나로 종료됨
+        * lock 획득(granted)
+        * 대기 시간 초과 (lock wait timeout)
+        * deadlock 감지 (deadlock detection) 
+* `Lock Wait Timeout`
+    * 설정된 대기 시간 초과
+    * `innodb_lock_wait_timeout`으로 대기 시간 설정 가능
+    * 1205 에러 발생
+        * ERROR 1205 (HY000): Lock wait timeout exceeded
+* `Deadlock Detection` [→ deadlock에 대한 내용 자세히 보기](deadlock.md)
+    * deadlock 발생
+    * 1213 에러 발생
+        * ERROR 1213 (40001): Deadlock found
+    * InnoDB가 rollback cost가 가장 적은 트랜잭션을 선택하여 rollback
 ## Lock 종류
 * `Shared Lock`(S Lock)
     * 읽기 전용 lock
@@ -60,11 +86,6 @@ select * from t1 where c1 = 1 for update;
 * InnoDB는 phantom read를 방지하기 위해 다양한 lock 메커니즘을 사용
     * phantom read는 범위 조건 쿼리에서 자주 발생
     * 단순히 특정 row를 잠그는 것이 아닌, index 구조를 기반으로 lock 범위를 결정하여 phantom read를 방지
-* 종류
-    * `Record Lock`
-    * `Gap Lock`
-    * `Next-Key Lock`
-    * `Insert Intention Lock`
 * InnoDB index page 내부에는 page 범위를 표현하기 위한 가상의 레코드가 존재
     * `Infimum pseudo-record`
         * 현재 page의 가장 작은 값보다 작은 위치를 나타냄
@@ -72,6 +93,31 @@ select * from t1 where c1 = 1 for update;
     * `Supremum pseudo-record`
         * 현재 page의 가장 큰 값보다 더 큰 위치를 나타냄
         * 개념적으로 `∞`에 해당
+* 종류
+    * table level
+        * `Intention Lock`(IS, IX)
+    * index level
+        * `Record Lock`
+        * `Gap Lock`
+        * `Next-Key Lock`
+        * `Insert Intention Lock`
+### Intention Lock
+```text
+?????????????????????
+이해하고 다시 정리하기!
+
+* row-level lock을 걸기 전에 table에 의도를 표시하는 lock
+    * '이 트랜잭션은 이 테이블의 row에 lock을 걸 예정이다'
+* 사용자가 직접 설정하지 않음
+    * InnoDB가 자동으로 관리
+    * row lock이 설정되면 해당 테이블에는 자동으로 intention lock이 설정됨
+* 테이블에 lock이 걸려있는지 table-level에서 빠르게 판단할 수 있음
+* 종류
+    * `Intention Shared`(IS)
+        * row에 shared lock을 걸 예정임을 표시
+    * `Intention Exclusive`(IX)
+        * row에 exclusive lock을 걸 예정임을 표시
+```
 ### Record Lock
 * 특정 index record에만 lock을 거는 방식
 * lock 범위 : `특정 인덱스 키 하나`
