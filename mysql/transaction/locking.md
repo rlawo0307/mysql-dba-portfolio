@@ -142,7 +142,7 @@ ex) 인덱스 구조 : [5, 10, 15, 20, 25]
 * range locking(gap lock/next-key lock)과는 충돌
     * 이미 다른 트랜잭션이 특정 gap에 range locking을 설정했다면
     * 해당 gap에 대한 insert는 lock이 해제될 때까지 대기
-<br>
+<br><br>
 
 # Lock과 Index의 관계
 * InnoDB에서 lock은 흔히 `row-level lock`이라고 부르지만, 실제로는 row 자체가 아닌 `index record 기준`으로 lock이 설정됨
