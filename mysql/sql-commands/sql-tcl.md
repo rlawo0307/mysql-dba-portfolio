@@ -1,5 +1,6 @@
 # 트랜잭션(Transaction)이란?
 * [→ 트랜잭션에 대한 내용 자세히 보기](../transaction/transaction-basics.md)
+* [→ autocommit, 트랜잭션 시작 시점 확인, DDL implicit commit 동작 확인 실습](../transaction/labs/transaction-implicit-commit.md)
 <br><br>
 
 # 트랜잭션 시작하기
