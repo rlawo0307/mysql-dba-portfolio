@@ -12,7 +12,7 @@
 - 격리 수준 ↑ → 안정성 ↑, 동시성/성능 ↓
 - 격리 수준 ↓ → 동시성/성능 ↑, 이상현상 가능성 ↑
 ```
-* 종류
+* 종류 [→ isolation level 별 동작 비교 실습](labs/isolation-level-comparison.md)
     * `READ UNCOMMITTED`
         * commit, rollback 여부와 상관없이 다른 트랜잭션에서 데이터 조회 가능
         * dirty read 가능
