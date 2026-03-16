@@ -104,8 +104,9 @@
 ### 핵심 아이디어
 * **데이터의 여러 버전을 유지하는 것**
 * row의 이전 버전을 undo log에 유지하여 트랜잭션이 snapshot 기준으로 적절한 row version을 읽을 수 있도록 함
-* 각 트랜잭션은 자신의 snapshot(=`Read View`)을 읽음
+* 각 트랜잭션은 자신의 snapshot(=`Read View`)을 읽음 [→ MVCC snapshot 실습](labs/mvcc-snapshot-check.md)
     * read view는 snapshot 시점의 `트랜잭션 상태 정보`를 저장
+    * read view는 트랜잭션이 처음 데이터에 접근할 때(select/update 등) 생성됨
 ### 저장 내용 및 구조
 * Clustered Index leaf node 구조
     * 실제 row 데이터
