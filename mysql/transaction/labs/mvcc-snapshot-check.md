@@ -21,7 +21,7 @@ create table t1(c1 int, c2 int);
 insert into t1 values (1, 100), (2, 200), (3, 300);
 
 -- 실험 시작
-set autocommit = 1; -- autocommit 비활성화
+set autocommit = 0; -- autocommit 비활성화
 
 start transaction; -- 트랜잭션1 시작
 select * from t1; -- 이 시점에 snapshot 생성
