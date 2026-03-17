@@ -83,7 +83,7 @@ select * from t1 where c1 = 1 for update;
 <br><br>
 
 # InnoDB Lock 범위 메커니즘
-* InnoDB의 lock은 row 단위가 아닌 index record 기준으로 동작
+* InnoDB의 lock은 row 단위가 아닌 index record 기준으로 동작 [→ 인덱스에 따른 lock 범위 비교 실습](labs/locking-index-behavior.md)
 * InnoDB는 phantom read를 방지하기 위해 다양한 lock 메커니즘을 사용
     * phantom read는 범위 조건 쿼리에서 자주 발생
     * 단순히 특정 row를 잠그는 것이 아닌, index 구조를 기반으로 lock 범위를 결정하여 phantom read를 방지
@@ -103,7 +103,8 @@ select * from t1 where c1 = 1 for update;
         * `Next-Key Lock`
         * `Insert Intention Lock`
 ### Intention Lock
-```text
+(이해하고 다시 정리하기)
+<!--
 ?????????????????????
 이해하고 다시 정리하기!
 
@@ -119,6 +120,7 @@ select * from t1 where c1 = 1 for update;
     * `Intention Exclusive`(IX)
         * row에 exclusive lock을 걸 예정임을 표시
 ```
+-->
 ### Record Lock
 * 특정 index record에만 lock을 거는 방식
 * lock 범위 : `특정 인덱스 키 하나`
