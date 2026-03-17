@@ -62,7 +62,7 @@
         * rollback 시 : undo log를 적용해 변경 내용을 원래 상태로 복구
         * commit 시 : 변경 내용이 확정됨. undo log는 즉시 삭제되지 않음    
     4. 이후 동작
-        * Consistent Read(MVCC)
+        * Consistent Read(MVCC) [→ consistent read와 current read 비교에 대한 내용 자세히 보기](consistent-vs-current-read.md)
             * 다른 트랜잭션이 Read View에 따라 undo log를 참조해 과거 버전의 데이터를 조회할 수 있음
         * undo log 정리
             * 참조 중인 Read View가 없을 경우 purge 과정에서 정리됨
@@ -107,6 +107,7 @@
 * 각 트랜잭션은 자신의 snapshot(=`Read View`)을 읽음 [→ MVCC snapshot 실습](labs/mvcc-snapshot-check.md)
     * read view는 snapshot 시점의 `트랜잭션 상태 정보`를 저장
     * read view는 트랜잭션이 처음 데이터에 접근할 때(select/update 등) 생성됨
+* [→ consistent read와 current read 비교에 대한 내용 자세히 보기](consistent-vs-current-read.md)
 ### 저장 내용 및 구조
 * Clustered Index leaf node 구조
     * 실제 row 데이터

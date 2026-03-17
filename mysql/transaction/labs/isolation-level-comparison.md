@@ -4,6 +4,7 @@
 * 참고 자료
     * [→ 트랜잭션에 대한 내용 자세히 보기](../transaction-basics.md)
     * [→ isolation level에 대한 내용 자세히 보기](../isolation-levels.md)
+    * [→ consistent read와 current read 비교에 대한 내용 자세히 보기](consistent-vs-current-read.md)
 <br><br>
 
 # Isolation level 확인 및 변경
