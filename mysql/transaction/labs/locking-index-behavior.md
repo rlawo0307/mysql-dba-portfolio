@@ -5,7 +5,7 @@
     * 인덱스가 존재하지만 사용하지 않을 경우
 * Index 종류 별 lock 범위 확인
     * unique index → `record lock`
-    * non-unique index → `record lock + gap lock`
+    * non-unique index → `next-key lock`
 * Index 종류 별 lock 전파 확인
     * secondary index
     * covering index
@@ -41,15 +41,6 @@ update t1 set c2 = 999 where c1 = 3; -- session2는 c1=3 인 row에 접근
 ```sql
 -- blocked되어 update 수행 지연
 ```
-### session 1
-```sql
-commit; -- 여기서 커밋 수행
-```
-### session 2
-```sql
-Query OK, 0 rows affected (36.74 sec) -- update 수행 완료
-Rows matched: 1  Changed: 0  Warnings: 0
-```
 ## index가 있을 때
 ### session 1
 ```sql
@@ -68,7 +59,7 @@ select * from t1 where c1 = 2 for update; -- session1은 c1=2 인 row에 접근
 update t1 set c2 = 999 where c1 = 3; -- session2는 c1=3 인 row에 접근
 ```
 ```sql
-Query OK, 1 row affected (0.00 sec) -- blocked되지 않고 udpate 수행 완료
+Query OK, 1 row affected (0.00 sec) -- blocked되지 않고 update 수행 완료
 Rows matched: 1  Changed: 1  Warnings: 0
 ```
 ## 결과
@@ -120,7 +111,7 @@ update t1 set c2 = 999 where c1 = 2; -- session1과 같은 row에 접근
 InnoDB는 row 단위로 exclusive lock(X lock)을 관리한다. 따라서 동일한 row에 대해 동시에 수정 작업을 수행하는 것은 허용되지 않는다. 
 
 즉, 인덱스는 lock 범위를 줄이는 역할을 할 뿐, 동일 row에 대한 동시 접근 충돌을 방지하지 않는다.
-<br>
+<br><br>
 
 # Index 유무에 따른 lock 범위 비교(3)
 * 인덱스가 존재하지만 사용되지 않을 경우, lock 범위가 어떻게 달라지는지 확인해보자
@@ -231,14 +222,19 @@ insert into t1 values (15, 150);
 ```
 ## 결과
 * `Unique index`의 경우, 특정 row에 대한 `record lock`만 걸림
-* `Non-unique index`의 경우, `record lock`과 함께 해당 row 주변의 gap에도 `gap lock`이 걸림
+* `Non-unique index`의 경우, `next-key lock`이 걸림
+    * record lock과 함께 해당 row 주변의 gap에도 gap lock이 걸림
+    * next-key lock = record lock + gap lock
 <br><br>
 
 # Index 종류 별 lock 전파 확인
-(이해하고 다시 정리하기)
-<!--
 ## secondary index
-* clustered index까지 lock이 전파되는지 확인해보자
+* secondary lock이 걸릴 경우 clustered index에도 lock이 함께 설정되는지 확인해보자
+    * `Index 종류 별 lock 범위 비교` 실험에서 확인한 결과
+        * secondary index가 unique → record lock
+        * secondary index가 non unique → next-key lock
+* `session 1`과 `session 2`는 같은 database의 다른 session으로 접속
+* non-unique secondary index(`idx1`)를 사용하여 next-key lock 발생
 ### session 1
 ```sql
 -- 실험 준비
@@ -249,9 +245,9 @@ insert into t1 values (10, 100, 1000), (20, 200, 2000), (30, 300, 3000);
 set autocommit = 0;
 
 start transaction;
-select * from t1 where c2 = 200 for update; -- secondary index lock
-                                            -- c2 = 200 : record lock
-                                            -- (c2=100, c2=200] : gap lock
+select * from t1 where c2 = 200 for update;
+-- secondary index 컬럼인 c2를 기준으로 c2=200 주변에 next-key lock이 걸림 : (100, 200]
+-- clustered index에도 lock이 함께 설정된다면 c1=(10, 20]에도 lock이 걸릴 것이라고 예상
 ```
 ### session 2
 * record lock 확인
@@ -259,29 +255,45 @@ select * from t1 where c2 = 200 for update; -- secondary index lock
 update t1 set c3 = 9999 where c1 = 20;
 ```
 ```sql
--- blocked되어 update 수행 지연, record lock 걸림
+-- blocked되어 update 수행 지연
+-- clustered index에도 record lock이 함께 설정됨
 ```
 * gap lock 확인
 ```sql
-insert into t1 values (15, 400, 4000); -- (c2=100, c2=200] : gap lock에 포함되지 않는 c2 데이터 삽입
+insert into t1 values (15, 400, 4000);
+-- 의도적으로 c2에 걸린 gap lock에 포함되지 않은 데이터 삽입 (c2=400)
 ```
 ```sql
-Query OK, 1 row affected (0.00 sec) -- insert 성공, gap lock 없음
+Query OK, 1 row affected (0.00 sec)
+-- insert 성공
+-- clustered index의 gap에는 lock이 설정되지 않음
 ```
 ## covering index
 * covering index는 데이터 접근 시 테이블을 건드리지 않고 인덱스에서 처리
-* table row에 lock이 걸리지 않는지 확인해보자
+* 실제 row(clustered index)에도 lock이 함께 설정되는지 확인해보자
+* `session 1`과 `session 2`는 같은 database의 다른 session으로 접속
+* non-unique인 covering index(`idx1`)를 사용하여 next-key lock 발생
 ### session 1
 ```sql
 -- 실험 준비
-create table t1(c1 int, c2 int, index idx1(c1, c2));
-insert into t1 values (10, 100), (20, 200), (30, 300);
+create table t1(c1 int primary key, c2 int, c3 int, index idx1(c2, c3));
+insert into t1 values (10, 100, 1000), (20, 200, 2000), (30, 300, 3000);
 
 -- 실험 시작
 set autocommit = 0;
 
 start transaction;
-select * from t1 where c1 = 20 for update;
+select c2, c3 from t1 where c2 = 200 for update;
+-- secondary index 컬럼인 c2를 기준으로 c2=200 주변에 next-key lock이 걸림 : (100, 200]
+-- clustered index에도 lock이 함께 설정된다면 c1=(10, 20]에도 lock이 걸릴 것이라고 예상
+explain select c2, c3 from t1 where c2 = 200 for update;
+```
+```sql
+type            : ref
+possible_keys   : idx1 
+key             : idx1
+key_len         : 5
+Extra           : Using index -- covering index 사용
 ```
 ### session 2
 * record lock 확인
@@ -290,16 +302,84 @@ update t1 set c2 = 999 where c1 = 20;
 ```
 ```sql
 -- blocked되어 update 수행 지연, record lock 걸림
+-- clustered index에도 record lock이 함께 설정됨
 ```
-* gap lock 확인
+* gap lock 확인 - c1 (clustered index)
 ```sql
-insert into t1 values (15, 15);
+insert into t1 values (15, 400, 4000);
 ```
 ```sql
--- blocked되어 insert 수행 지연, gap lock 걸림
+Query OK, 1 row affected (0.00 sec)
+-- insert 성공
+-- clustered index의 gap에는 lock이 설정되지 않음
+```
+* gap lock 확인 - c2 (covering index 컬럼, 조건 컬럼)
+```sql
+insert into t1 values (40, 250, 4000);
+```
+```sql
+-- blocked되어 insert 수행 지연
+-- 검색 조건(c2=200)을 기준으로 형성된 인덱스 범위 (100, 200]에 대해 gap lock이 적용됨
+```
+* gap lock 확인 - c3 (covering index 컬럼)
+```sql
+insert into t1 values (40, 400, 1500);
+```
+```sql
+Query OK, 1 row affected (0.00 sec)
+-- insert 성공
+-- covering index 컬럼이지만 조건 컬럼에 포함되지 않으므로 lock 범위 결정에 영향을 주지 않음
 ```
 ## 결과
-* secondary index : record lock만 clustered index에 전파됨
-* covering index : row에 record lock, gap lock 모두 걸림
+* secondary index, covering index
+    * record lock : clustered index에 함께 설정됨
+    * gap lock : clustered index에 설정되지 않음
 ## 결론
--->
+secondary index 또는 covering index를 사용하여 row를 검색하는 경우, clustered index에는 record lock만 설정되고 gap lock은 적용되지 않는 것을 확인할 수 있다.
+
+InnoDB는 실제 데이터를 보호하기 위해 clustered index에 record lock만 설정하며, gap lock은 검색에 사용된 인덱스를 기준으로 형성된 범위(`(100, 200]`)에 대해서만 적용된다. 즉, gap lock은 검색에 사용된 인덱스 범위에 대해서만 적용되며 clustered index의 gap까지는 확장되지 않는다.
+
+또한, 다중 컬럼 인덱스의 경우에도 lock 범위는 인덱스 전체가 아니라 where 조건에 사용된 인덱스 prefix를 기준으로 결정되며, 조건에 포함되지 않은 컬럼은 lock 범위 결정에 영향을 주지 않는다.
+## covering index - 추가 실험
+* 이전 실험에서 다중 컬럼 인덱스의 경우, lock 범위는 where 조건에 사용된 인덱스 `prefix`를 기준으로 결정됨을 확인
+* 인덱스 prefix 조건을 만족하지 못하는 경우 locking 동작이 어떻게 달라지는지 확인해보자
+### session 1
+```sql
+create table t1(c1 int primary key, c2 int, c3 int, index idx1(c2, c3));
+insert into t1 values (10, 100, 1000), (20, 200, 2000), (30, 300, 3000);
+
+set autocommit = 0;
+
+start transaction;
+select c2, c3 from t1 where c3 = 2000 for update;
+explain select c2, c3 from t1 where c3 = 2000 for update;
+explain analyze select c2, c3 from t1 where c3 = 2000 for update;
+```
+```sql
+type            : index -- index full scan
+possible_keys   : idx1 
+key             : idx1
+key_len         : 10
+Extra           : Using where; Using index -- covering index를 사용하지만 where에서 조건 필터링 (prefix 깨짐)
+```
+```sql
+| -> Filter: (t1.c3 = 2000)  (cost=0.55 rows=1) (actual time=0.031..0.0353 rows=1 loops=1)
+    -> Covering index scan on t1 using idx1  (cost=0.55 rows=3) (actual time=0.0264..0.033 rows=3 loops=1)
+ |
+```
+### session 2
+* gap lock 확인
+```sql
+insert into t1 values (40, 250, 4000); -- c2의 blocking 확인
+insert into t1 values (40, 400, 1500); -- c3의 blocking 확인
+```
+```sql
+-- 둘다 blocked되어 insert 수행 지연
+```
+## 결과
+* index full scan 수행
+* scan된 인덱스 전체 범위에 대해 lock 설정
+## 결론
+인덱스 prefix를 만족하지 못할 경우, index full scan을 수행하게 되고 결과적으로 특정 범위가 아닌 scan된 인덱스 전체 범위에 lock이 설정된다. 
+
+즉, 다중 컬럼 인덱스에서 lock 범위는 단순히 where 조건에 등장한 컬럼이 아니라 `실제로 사용된 인덱스 prefix`를 기준으로 결정된다.
