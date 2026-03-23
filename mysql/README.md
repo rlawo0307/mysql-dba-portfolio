@@ -41,6 +41,9 @@
 * join 기본 - [join-internal.md](optimization/join-internal.md)
 * LIMIT 쿼리 이해 - [limit.md](optimization/limit.md)
 * 옵티마이저와 통계정보 - [optimizer-statistics.md](optimization/optimizer-statistics.md)
+## partitioning
+* 파티셔닝 기본 - [partitioning-basics.md](partitioning/partitioning-basics.md)
+* 파티션 관리 - [partition-maintenance.md](partitioning/partition-maintenance.md)
 ## sql-commands
 * SQL 명령어 - [sql-command-overview.md](sql-commands/sql-command-overview.md)
 * DCL - [sql-dcl.md](sql-commands/sql-dcl.md)
@@ -53,3 +56,9 @@
 * 트랜잭션 메커니즘 - [transaction-mechanism.md](transaction/transaction-mechanism.md)
 * Locking - [locking.md](transaction/locking.md)
 * Deadlock - [deadlock.md](transaction/deadlock.md)
+* Consistent Read vs Current Read - [consistent-vs-current-read.md](transaction/consistent-vs-current-read.md)
+### labs
+* 트랜잭션 lifecycle 동작 확인 - [transaction-implicit-commit.md](transaction/labs/transaction-implicit-commit.md)
+* Isolation level 동작 확인 - [isolation-level-comparison.md](transaction/labs/isolation-level-comparison.md)
+* MVCC snapshot 확인 - [mvcc-snapshot-check.md](transaction/labs/mvcc-snapshot-check.md)
+* 인덱스별 lock 범위 비교 실습 - [locking-index-behavior.md](transaction/labs/locking-index-behavior.md)
