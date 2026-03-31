@@ -44,12 +44,16 @@
 ## partitioning
 * 파티셔닝 기본 - [partitioning-basics.md](partitioning/partitioning-basics.md)
 * 파티션 관리 - [partition-maintenance.md](partitioning/partition-maintenance.md)
+* Partitioned Index - [partition-index.md](partitioning/partition-index.md)
 ## sql-commands
 * SQL 명령어 - [sql-command-overview.md](sql-commands/sql-command-overview.md)
 * DCL - [sql-dcl.md](sql-commands/sql-dcl.md)
 * DDL - [sql-ddl.md](sql-commands/sql-ddl.md)
 * DML - [sql-dml.md](sql-commands/sql-dml.md)
 * TCL - [sql-tcl.md](sql-commands/sql-tcl.md)
+* 뷰 - [view.md](sql-commands/view.md)
+* 저장 프로시저 - [stored-procedure.md](sql-commands/stored-procedure.md)
+* 트리거 - [trigger.md](sql-commands/trigger.md)
 ## transaction
 * 트랜잭션 기본 개념 - [transaction-basics.md](transaction/transaction-basics.md)
 * 격리 수준 - [isolation-levels.md](transaction/isolation-levels.md)
