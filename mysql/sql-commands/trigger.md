@@ -81,7 +81,7 @@ end;
 5. commit 또는 rollback
 ```
 # Trigger와 Deadlock
-* deadlock 발생 원인 [→ deadlock에 대한 내용 자세히 보기](../transaction/deadlock.md)
+* [deadlock](../transaction/deadlock.md) 발생 원인
     * 트리거는 자동 실행되므로 사용자가 트리거 내부 동작을 바로 알기 어려움
         * 사용자가 예상한 것보다 더 많은 테이블에 대한 lock을 획득할 수 있음
         * 사용자가 작성한 SQL만으로는 실제 lock 획득 순서를 알기 어려움

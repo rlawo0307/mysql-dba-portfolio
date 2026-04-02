@@ -92,8 +92,7 @@ explain select * from t1 where year(c1) = 2024; -- type=ALL
 explain select * from t1 where c1 >= 99.5 and c1 < 100; -- type=range, key=idx1
 explain select * from t1 where c2 >= '2024-01-01' and c2 < '2025-01-01'; -- type=range, key=idx2
 ```
-### 2. 타입 불일치 (암시적 형 변환)
-* [→ 암시적 형 변환에 대한 내용 자세히 보기](../optimization/implicit-type-conversion.md)
+### 2. 타입 불일치 ([암시적 형 변환](../optimization/implicit-type-conversion.md))
 * 해결 방법 1) 타입 일치시키기
 * 해결 방법 2) 명시적 형 변환 사용
 * 해결 방법 3) 컬럼 타입 변경을 고려해보기

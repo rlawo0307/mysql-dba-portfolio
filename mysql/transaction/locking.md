@@ -3,7 +3,7 @@
 * InnoDB는 `row-level locking`을 지원
     * 테이블 전체가 아닌 개별 row 단위로 lock을 거는 방식
     * 실제로는 row가 아닌 index record를 lock
-## Lock 상태 [→ lock 상태 확인 실습](labs/lock-monitoring.md)
+## Lock 상태
 ```text
 lock 요청 → 충돌 없음 → Granted
 
@@ -24,8 +24,8 @@ lock 요청 → 충돌 발생 → Waiting → Granted / Timeout / Deadlock
     * `innodb_lock_wait_timeout`으로 대기 시간 설정 가능
     * 1205 에러 발생
         * ERROR 1205 (HY000): Lock wait timeout exceeded
-* `Deadlock Detection` [→ deadlock에 대한 내용 자세히 보기](deadlock.md)
-    * deadlock 발생
+* `Deadlock Detection`
+    * [deadlock](deadlock.md) 발생
     * 1213 에러 발생
         * ERROR 1213 (40001): Deadlock found
     * InnoDB가 rollback cost가 가장 적은 트랜잭션을 선택하여 rollback

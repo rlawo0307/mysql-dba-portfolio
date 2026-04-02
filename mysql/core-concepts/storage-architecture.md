@@ -35,7 +35,7 @@ Tablespace
         * non-leaf page
             * key + child page pointer
     * Undo Page
-        * undo log를 저장하는 page [→ undo log에 대해 자세히 보기](../transaction-management.md)
+        * [undo log](../transaction-management.md)를 저장하는 page
         * 트랜잭션 이전 값을 저장
         * 저장 위치
             * 별도의 undo tablespace

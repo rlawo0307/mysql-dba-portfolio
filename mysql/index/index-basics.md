@@ -66,7 +66,7 @@
         * 해당 row를 마지막으로 수정한 트랜잭션 ID
     * roll_pointer
         * undo log를 가리키는 포인터
-        * MVCC를 위한 정보 [→ MVCC에 대한 내용 자세히 보기](../transaction/transaction-mechanism.md)
+        * [MVCC](../transaction/transaction-mechanism.md)를 위한 정보
 * 테이블 당 하나만 존재 가능
 * 구조 : `B+Tree` 구조
 * Secondary Index의 기준점 역할

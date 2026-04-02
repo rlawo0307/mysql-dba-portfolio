@@ -25,7 +25,7 @@
     * `Isolation`(격리성)
         * 여러 트랜잭션이 동시에 실행되더라도 각 트랜잭션이 독립적으로 실행되는 것처럼 보여야 함
         * 격리되지 않은 경우 트랜잭션의 중간 상태가 노출되어 이상현상이 발생할 수 있음
-        * isolation level로 제어 [→ isoloation level에 대한 내용 자세히 보기](isolation-levels.md)
+        * [isoloation level](isolation-levels.md)로 제어
         * MVCC, lock을 통해 구현
     * `Durability`(영속성)
         * commit된 데이터는 시스템 장애가 발생해도 유지되어야 함

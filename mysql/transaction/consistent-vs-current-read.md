@@ -5,7 +5,7 @@
 <br><br>
 
 # Consistent Read
-* MVCC를 이용해서 과거의 데이터(snapshot)을 읽는 방식 [→ MVCC에 대한 내용 자세히 보기](transaction-mechanism.md)
+* [MVCC](transaction-mechanism.md)를 이용해서 과거의 데이터(snapshot)을 읽는 방식
 * 일반 select 수행 시 동작
 * 내부 동작
 ```
@@ -24,7 +24,7 @@
 
 # Current Read
 * 항상 최신 데이터를 읽고, 동시에 lock을 획득하는 방식
-* locking read, update/delete 수행 시 동작 [→ locking read에 대한 내용 자세히 보기](locking.md)
+* [locking read](locking.md), update/delete 수행 시 동작
     * update/delete는 내부적으로 조건에 맞는 row를 찾을 때 current read를 사용하며 동시에 write lock을 획득
 * 내부 동작
 ```
