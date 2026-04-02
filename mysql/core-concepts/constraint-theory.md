@@ -266,7 +266,7 @@ alter table t1 drop check chk1;
 <br>
 
 # FOREIGN KEY (FK)
-### [→ fk 기본 동작 실습 자세히 보기](labs/fk-behavior.md)
+### [→ fk 기본 동작 실습](labs/fk-behavior.md)
 * 한 테이블의 컬럼이 다른 테이블의 `pk` 또는 `Unique Key`를 참조하도록 강제
     * 참조 당하는 테이블 → 부모 테이블
     * 참조 하는 테이블 → 자식 테이블

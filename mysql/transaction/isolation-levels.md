@@ -32,7 +32,7 @@
         * SQL 표준에서는 phantom read 가능
         * InnoDB에서는 Next-key Lock을 사용해서 phantom read 방지
         * **MySQL의 기본 isolation level**
-    * `SERIALIZABLE` [→ consistent read와 current read 비교에 대한 내용 자세히 보기](consistent-vs-current-read.md)
+    * `SERIALIZABLE` [→ consistent read와 current read 비교](consistent-vs-current-read.md)
         * 모든 트랜잭션을 직렬 실행할 것과 동일한 결과를 보장
         * 일반 select 쿼리도 lock을 획득하여 실행됨
         * 가장 단순하면서 가장 엄격한 격리 수준

@@ -71,7 +71,7 @@ lock tables t1 write;
 * 일반적인 select는 MVCC를 통해 lock을 획득하지 않음(`Consistent Read`)
 * 특정 상황에서 읽으면서 lock을 획득하고자 하는 요구가 있을 수 있음(`Current Read`)
     * '내가 읽은 데이터가 트랜잭션 동안 수정되지 않게 하고 싶다'
-* [→ consistent read와 current read 비교에 대한 내용 자세히 보기](consistent-vs-current-read.md)
+* [→ consistent read와 current read 비교](consistent-vs-current-read.md)
 ```sql
 -- shared lock 획득
 select * from t1 where c1 = 10 for share;

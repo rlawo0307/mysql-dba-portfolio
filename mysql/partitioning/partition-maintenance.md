@@ -1,4 +1,5 @@
-# Partition 관리 [→ partitioning 기본 개념](partitioning-basics.md)
+# Partition 관리
+* [→ partitioning 기본 개념](partitioning-basics.md)
 * partition은 DDL을 통해 동적으로 관리할 수 있음
 * 주로 데이터 증가 및 삭제에 맞춰 partition을 추가하거나 제거하는 용도로 사용
 ## Add Partition

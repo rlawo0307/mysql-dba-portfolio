@@ -58,7 +58,7 @@ SelectStatement
     * 표현식의 데이터 타입 결정 등
 <br>
 
-# Optimizer
+# [Optimizer](../optimization/optimizer-statistics.md)
 * MySQL은 Cost-Based Optimizer(CBO)를 사용
 * 결과물 : `Optimized Execution Plan` (=physical plan)
     * explain 명령어로 실행계획 확인 가능
@@ -71,7 +71,6 @@ SelectStatement
     * join 순서 및 방식 결정
     * filesort 사용 여부
     * temp table 사용 여부 등
-* [→ optimizer에 대한 내용 자세히 보기](../optimization/optimizer-statistics.md)
 <br>
 
 # Executor
