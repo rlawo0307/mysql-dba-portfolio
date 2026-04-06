@@ -34,7 +34,7 @@ create table 테이블명 (
     * 인덱스 (`index`)
         * 검색 속도를 빠르게 하기 위한 구조
         * `primary key`와 `unique`는 자동으로 인덱스 생성
-    * 테이블 엔진 (`storage engine`)
+    * 테이블 엔진 (`storage engine`) [→ enigne 별 transaction 지원 여부 확인 실습](../administration/labs/storage-engine-comparison.md)
         * MySQL에서 테이블 데이터를 저장하고 관리하는 방식이나 시스템
         * 데이터가 어떻게 저장, 조회, 수정되는지를 담당하는 백엔드 소프트웨어 컴포넌트
         * MySQL은 대표적으로 `InnoDB`을 사용
