@@ -74,7 +74,7 @@ as select ...
     * 지정하지 않으면 현재 사용자로 자동 설정됨
 * `sql security`
     * 뷰 실행 시 권한 평가 기준을 결정
-    * 종류
+    * 종류 [→ sql security 옵션 비교](../administration/labs/sql-security-option-comparion.md)
         * `definer` (default)
             * 뷰를 **생성한** 사용자 권한으로 실행
             * 뷰를 definer 권한으로 실행
