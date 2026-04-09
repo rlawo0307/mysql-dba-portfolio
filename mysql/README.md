@@ -13,10 +13,10 @@
 * MySQL 설치 및 초기 설정 - [installation.md](administration/installation.md)
 * 사용자 관리 - [user-account.md](administration/user-account.md)
 #### labs
-* MySQL host 매칭 동작 확인 - [mysql-user-host-matching.md](administration/labs/mysql-user-host-matching.md)
-* 설정 파일 및 환경 변수 확인 - [config-and-variable-check.md](administration/labs/config-and-variable-check.md)
-* 스토리지 엔진 별 트랜잭션 지원 여부 확인 - [storage-engine-comparison.md](administration/labs/storage-engine-comparison.md)
-* SQL Security 옵션 비교 - [sql-security-option-comparion.md](administration/labs/sql-security-option-comparion.md)
+* MySQL user@host 매칭 우선순위 확인 - [mysql-user-host-matching.md](administration/labs/mysql-user-host-matching.md)
+* 설정 파일 및 시스템 변수 확인 - [config-and-variable-check.md](administration/labs/config-and-variable-check.md)
+* 스토리지 엔진 별 트랜잭션 지원 여부 비교 - [storage-engine-comparison.md](administration/labs/storage-engine-comparison.md)
+* SQL Security 옵션 (DEFINER / INVOKER) 비교 - [sql-security-option-comparion.md](administration/labs/sql-security-option-comparion.md)
 ---
 ### availability
 * Replication 및 Clustering - [replication-and-clustering.md](availability/replication-and-clustering.md)
@@ -33,26 +33,26 @@
 ---
 ### index
 * 인덱스를 타지 않는 쿼리 패턴 - [index-antipatterns.md](index/index-antipatterns.md)
-* 인덱스 기본 - [index-basics.md](index/index-basics.md)
+* B+Tree 구조 + 인덱스 기본 개념 - [index-basics.md](index/index-basics.md)
 * 인덱스 힌트 - [index-hint.md](index/index-hint.md)
 #### labs
 * Index Scan 유형 분석 - [01-explain-index-scan-types.md](index/labs/01-explain-index-scan-types.md)
-* Full Table Scan vs Index Scan - [02-full-table-scan-vs-index-scan.md](index/labs/02-full-table-scan-vs-index-scan.md)
-* 옵티마이저의 인덱스 선택 - [03-index-selection.md](index/labs/03-index-selection.md)
-* 인덱스 성능 실험 - [04-index-performance-experiment.md](index/labs/04-index-performance-experiment.md)
-* 인덱스 성능 실험 2 - [05-index-performance-experiment-2.md](index/labs/05-index-performance-experiment-2.md)
-* 복합 인덱스 순서 실험 - [06-composite-index-leftmost-rule.md](index/labs/06-composite-index-leftmost-rule.md)
-* Filesort vs Index Ordering - [07-filesort-vs-index-ordering.md](index/labs/07-filesort-vs-index-ordering.md)
+* Full Table Scan vs Index Scan 성능 비교 - [02-full-table-scan-vs-index-scan.md](index/labs/02-full-table-scan-vs-index-scan.md)
+* 옵티마이저의 인덱스 선택 기준 분석 - [03-index-selection.md](index/labs/03-index-selection.md)
+* 인덱스 성능 실험1 - [04-index-performance-experiment.md](index/labs/04-index-performance-experiment.md)
+* 인덱스 성능 실험2 - [05-index-performance-experiment-2.md](index/labs/05-index-performance-experiment-2.md)
+* 복합 인덱스 leftmost rule 검증 - [06-composite-index-leftmost-rule.md](index/labs/06-composite-index-leftmost-rule.md)
+* Filesort vs Index Driven Sort 비교 - [07-filesort-vs-index-ordering.md](index/labs/07-filesort-vs-index-ordering.md)
 ---
 ### optimization
-* 실행 계획 이해 - [explain.md](optimization/explain.md)
+* 실행 계획 해석 - [explain.md](optimization/explain.md)
 * 암시적 형 변환 - [implicit-type-conversion.md](optimization/implicit-type-conversion.md)
-* Join 기본 - [join-internal.md](optimization/join-internal.md)
-* LIMIT 쿼리 이해 - [limit.md](optimization/limit.md)
+* Join - [join-internal.md](optimization/join-internal.md)
+* Limit - [limit.md](optimization/limit.md)
 * 옵티마이저와 통계정보 - [optimizer-statistics.md](optimization/optimizer-statistics.md)
 ---
 ### partitioning
-* 파티셔닝 기본 - [partitioning-basics.md](partitioning/partitioning-basics.md)
+* 파티셔닝 기본 개념 - [partitioning-basics.md](partitioning/partitioning-basics.md)
 * 파티션 관리 - [partition-maintenance.md](partitioning/partition-maintenance.md)
 * Partitioned Index - [partition-index.md](partitioning/partition-index.md)
 #### labs
@@ -71,14 +71,14 @@
 ### transaction
 * 트랜잭션 기본 개념 - [transaction-basics.md](transaction/transaction-basics.md)
 * 격리 수준 - [isolation-levels.md](transaction/isolation-levels.md)
-* 트랜잭션 메커니즘 - [transaction-mechanism.md](transaction/transaction-mechanism.md)
-* Locking - [locking.md](transaction/locking.md)
+* 트랜잭션 메커니즘 (undo / redo / MVCC) - [transaction-mechanism.md](transaction/transaction-mechanism.md)
+* Locking (record / gap / next-key lock) - [locking.md](transaction/locking.md)
 * Deadlock - [deadlock.md](transaction/deadlock.md)
 * Consistent Read vs Current Read - [consistent-vs-current-read.md](transaction/consistent-vs-current-read.md)
 #### labs
-* 트랜잭션 lifecycle 동작 확인 - [transaction-implicit-commit.md](transaction/labs/transaction-implicit-commit.md)
-* Isolation level 동작 확인 - [isolation-level-comparison.md](transaction/labs/isolation-level-comparison.md)
-* MVCC snapshot 확인 - [mvcc-snapshot-check.md](transaction/labs/mvcc-snapshot-check.md)
-* 인덱스별 lock 범위 비교 실습 - [locking-index-behavior.md](transaction/labs/locking-index-behavior.md)
-* Limit 사용 여부에 따른 lock 범위 비교 실습 - [locking-limit-behavior.md](transaction/labs/locking-limit-behavior.md)
-* Order by 방식에 따른 lock 범위 비교 실습 - [locking-order-by-behavior.md](transaction/labs/locking-order-by-behavior.md)
+* 트랜잭션 lifecycle 확인 - [transaction-implicit-commit.md](transaction/labs/transaction-implicit-commit.md)
+* Isolation level 별 동작 비교 - [isolation-level-comparison.md](transaction/labs/isolation-level-comparison.md)
+* MVCC snapshot 생성 시점 및 동작 확인 - [mvcc-snapshot-check.md](transaction/labs/mvcc-snapshot-check.md)
+* 인덱스 별 lock 범위 비교 - [locking-index-behavior.md](transaction/labs/locking-index-behavior.md)
+* Limit 사용 여부에 따른 lock 범위 비교 - [locking-limit-behavior.md](transaction/labs/locking-limit-behavior.md)
+* Order by 방식에 따른 lock 범위 비교 - [locking-order-by-behavior.md](transaction/labs/locking-order-by-behavior.md)
