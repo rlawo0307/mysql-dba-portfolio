@@ -16,6 +16,7 @@
 * MySQL host 매칭 동작 확인 - [mysql-user-host-matching.md](administration/labs/mysql-user-host-matching.md)
 * 설정 파일 및 환경 변수 확인 - [config-and-variable-check.md](administration/labs/config-and-variable-check.md)
 * 스토리지 엔진 별 트랜잭션 지원 여부 확인 - [storage-engine-comparison.md](administration/labs/storage-engine-comparison.md)
+* SQL Security 옵션 비교 - [sql-security-option-comparion.md](administration/labs/sql-security-option-comparion.md)
 ---
 ### availability
 * Replication 및 Clustering - [replication-and-clustering.md](availability/replication-and-clustering.md)
@@ -54,6 +55,8 @@
 * 파티셔닝 기본 - [partitioning-basics.md](partitioning/partitioning-basics.md)
 * 파티션 관리 - [partition-maintenance.md](partitioning/partition-maintenance.md)
 * Partitioned Index - [partition-index.md](partitioning/partition-index.md)
+#### labs
+* Partition Pruning 성능 실험 - [partition-pruning-performance.md](partitioning/labs/partition-pruning-performance.md)
 ---
 ### sql-commands
 * SQL 명령어 - [sql-command-overview.md](sql-commands/sql-command-overview.md)
@@ -77,3 +80,5 @@
 * Isolation level 동작 확인 - [isolation-level-comparison.md](transaction/labs/isolation-level-comparison.md)
 * MVCC snapshot 확인 - [mvcc-snapshot-check.md](transaction/labs/mvcc-snapshot-check.md)
 * 인덱스별 lock 범위 비교 실습 - [locking-index-behavior.md](transaction/labs/locking-index-behavior.md)
+* Limit 사용 여부에 따른 lock 범위 비교 실습 - [locking-limit-behavior.md](transaction/labs/locking-limit-behavior.md)
+* Order by 방식에 따른 lock 범위 비교 실습 - [locking-order-by-behavior.md](transaction/labs/locking-order-by-behavior.md)
