@@ -24,27 +24,21 @@ Clustering : 복제 + 고가용성 운영 구조(서비스 지속성, 노드 집
     * 지역 간 데이터 복제
 ### 동작 원리
 ```text
-Client
-  │
-  ▼
-Source
-  1. 트랜잭션 실행
-  2. Binary Log(binlog)에 변경 사항 기록
-  3. Binlog Dump Thread가 Replica로 binlog 전송
-         │
-         ▼
-Replica
-  1. Receiver(I/O) Thread가 수신
-  2. Relay Log에 저장
-  3. SQL Thread가 실행하여 반영
+[Client] -----▶ [Source]    
+                  1. 트랜잭션 실행
+                  2. binlog에 변경 사항 기록
+                  3. Binlog Dump Thread가 Replica로 binlog 전송 -----▶ [Replica]
+                  4. binlog flush (디스크에 기록)                         1. Receiver(I/O) Thread가 binlog 수신
+                  5. commit                                             2. Relay Log에 저장
+                                                                        3. SQL Thread가 실행하여 반영
 ```
-* `Binary Log`
-    * source에서 발생한 변경 이벤트 기록
-    * 단순히 data file을 통째로 실시간 복사하는 것이 아님
-    * 변경 이력(이벤트/로그) 기반으로 동작
+* `binlog (Binary Log)` [→ binlog 자세히 보기](binlog-and-GTID.md)
+    * MySQL에서 발생한 데이터 변경 이력(DDL, DML)을 기록하는 로그
+    * 단순히 data file 자체를 복제하는 것이 아니라, 변경 내용을 이벤트 단위로 기록
+    * 하나의 트랜잭션은 여러 개의 binlog event로 구성
 * `Relay Log`
     * replica가 source로부터 받은 이벤트를 임시 저장하는 로그
-### Replication 종류
+## Replication 종류
 * Synchronous Replication
     * source는 트랜잭션 커밋 전에 모든 replica 변경사항이 적용(커밋)될 때가지 기다림
     * **MySQL은 완전한 synchronous replication을 지원하지 않음**
@@ -101,7 +95,7 @@ Replica
         * 성능 오버헤드가 있음
         * 운영 난이도 높음
         * multi primary 모드의 경우, 설계 난이도가 매우 높고 write 충돌 관리가 어려움
-### Replication Lag
+## Replication Lag
 * source의 커밋 시점과 replica의 반영 시점 사이에서 발생하는 시간 차이
 * replica가 source를 늦게 따라가는 상태
 * async replication에서 발생
@@ -132,7 +126,7 @@ Replica
 * 단순 복제뿐만 아니라 서비스 지속성과 노드 집합 관리가 더해진 형태
 * replication이 "데이터 복제"라면, clustering은 "서비스 전체를 유지하는 구조"
 * clustering은 고가용성(HA)를 위한 핵심 구조
-### Clustering 종류
+## Clustering 종류
 * group replication 기반 cluster
     * replication을 이용한 고가용성 구조
     * 일반 MySQL 서버를 기반으로 구성
