@@ -7,6 +7,7 @@
 ### 설정 파일 경로 확인
 ```bash
 mysqld --help | grep -A 1 "Default options"
+mysqld --verbose --help | grep -A 5 "Default options"
 ```
 ```bash
 Default options are read from the following files in the given order:
