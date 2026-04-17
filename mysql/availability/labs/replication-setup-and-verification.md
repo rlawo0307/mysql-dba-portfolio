@@ -155,7 +155,7 @@ show replica status; -- 원하는 컬럼만 직접 조회할 수 없음
 # \G 출력 후 grep으로 필요한 항목만 확인할 수 있음
 sudo mysql -e "show replica status\G" | grep -E "Source_Host|Replica_IO_Running|Replica_SQL_Running|Seconds_Behind_Source|Last_IO_Error|Last_SQL_Error"
 ```
-* replication 연결 성공 시 출력 결과 [→ 실패 시 출력 결과 및 해결 방법](tmp1.md)
+* replication 연결 성공 시 출력 결과 [→ Replication 실패 원인별 트러블슈팅 가이드](replication-failure-cases.md)
 ```sql
 Source_Host             : 192.168.111.129   -- replica가 접속하려는 source 주소
 Replica_IO_Running      : Yes               -- I/O thread 상태 (source에서 binlog를 가져오는 thread)
