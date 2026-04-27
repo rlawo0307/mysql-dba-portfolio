@@ -26,7 +26,7 @@ Source_Host             : 192.168.111.129
 Replica_IO_Running      : Connecting -- source에 접속을 계속 재시도 중
 Replica_SQL_Running     : Yes -- 기존 relay log가 있다면 SQL thread는 계속 동작 가능
 Seconds_Behind_Source   : 0
-Last_IO_Error           : Error connecting to source 'repl@192.168.111.129:3306'. This was attempt 3/86400, with a delay of 60 seconds between attempts. Message: Can't connect to MySQL server on '192.168.111.129:3306' (110)
+Last_IO_Error           : Error connecting to source 'binlog_reader@192.168.111.129:3306'. This was attempt 3/86400, with a delay of 60 seconds between attempts. Message: Can't connect to MySQL server on '192.168.111.129:3306' (110)
 Last_SQL_Error          : 
 ```
 ### 현상
@@ -107,7 +107,7 @@ Source_Host             : 192.168.111.129
 Replica_IO_Running      : Connecting -- source에 연결을 계속 재시도 중
 Replica_SQL_Running     : Yes -- 기존 relay log가 있다면 SQL thread는 계속 동작 가능
 Seconds_Behind_Source   : 0
-Last_IO_Error           : Error connecting to source 'repl@192.168.111.129:3306'. This was attempt 9/86400, with a delay of 60 seconds between attempts. Message: Authentication plugin 'caching_sha2_password' reported error: Authentication requires secure connection.
+Last_IO_Error           : Error connecting to source 'binlog_reader@192.168.111.129:3306'. This was attempt 9/86400, with a delay of 60 seconds between attempts. Message: Authentication plugin 'caching_sha2_password' reported error: Authentication requires secure connection.
 129:3306' (110)
 Last_SQL_Error          : 
 ```
