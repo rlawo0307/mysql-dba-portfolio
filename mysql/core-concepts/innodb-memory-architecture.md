@@ -163,6 +163,22 @@ Redo Log Buffer(memory)에 변경 내용 기록
            ↓
 Redo Log File(disk)로 flush
 ```
+## LSN 과 Checkpoint
+* 데이터 변경 시, data page는 즉시 반영되지 않고 redo log만 먼저 기록됨
+* 즉, data file은 항상 최신 상태가 아닐 수 있음
+* 어디까지 disk에 반영됐는지 알 수 있어야 함
+### Log Sequence Number(LSN)
+* redo log 상의 논리적 위치를 나타내는 값
+* 모든 변경 작업은 LSN 기준으로 순서가 관리됨
+### checkpoint
+* redo log와 data file(disk) 간의 동기화 상태를 나타내는 기준 LSN
+    * 해당 LSN까지의 변경 내용은 disk에 반영되었음을 의미
+* crash 발생 시, checkpoint 이후의 redo log를 재적용하여 복구
+* checkpoint 이전의 redo log는 이미 반영되었으므로 덮어써도 무방함
+* redo log 부족 시 동작
+    1. dirty page를 disk로 flush
+    2. checkpoint를 앞으로 이동
+    3. redo log 공간 확보
 <br><br>
 
 # Session Memory
