@@ -166,14 +166,33 @@ Redo Log File(disk)로 flush
 <br><br>
 
 # Session Memory
-### 개념
-* 각 connection 별로 사용하는 메모리
-* 세션 단위 메모리
-### 구성
-* sort buffer
-* join buffer
-* read buffer
-* tmp table memory
-### 특징
-* connection 수 만큼 증가
-* 과도하면 OOM 위험
+* 각 connection(세션)마다 필요 시 동적으로 할당되는 쿼리 실행용 메모리
+    * 세션끼리 공유하지 않고 독립적으로 사용
+    * 항상 사용하는게 아니라 쿼리 실행 시 연산을 수행할 때 할당
+* 세션 수가 많고, 여러 작업이 동시에 수행되면 전체 메모리 사용량이 크게 증가할 수 있음
+## Sort Buffer
+* order by / group by 처리 과정 중 정렬 작업을 수행하기 위한 세션 메모리
+* 인덱스로 정렬을 처리할 수 없으면 filesort 과정에서 사용될 수 있음
+* `sort_buffer_size`로 메모리 사이즈 설정 가능
+    * 과도하게 크게 설정하면 동시 접속 증가 시 메모리 사용량이 커질 수 있음
+## Join Buffer
+* join 연산을 수행하기 위한 세션 메모리
+* join 중간 결과 및 비교 대상를 저장할 때 사용
+* join 조건에 적절한 인덱스를 사용하지 못하거나, 비효율적인 join plan이 선택될 때 사용
+* block nested loop join, batched key access 등에서 사용
+* `join_buffer_size`로 메모리 사이즈 설정 가능 (default : `256KB`)
+    * join buffer가 크면 일부 join에서 I/O를 줄일 수 있음
+    * 과도한 사이즈는 메모리 사용량이 커질 수 있음
+## Read Buffer
+* table scan 시, 데이터 읽기 효율을 높이기 위한 보조 메모리
+    * 근본적인 성능 개선책은 아님
+    * 인덱스 설계가 더 중요!
+* `read_buffer_size`로 메모리 사이즈 설정 가능
+## Tmp Table Memory
+* 쿼리 실행 중 내부 임시 테이블을 만들 때 사용하는 세션 메모리
+* group by, distinct, union, 일부 order by 처리에서 사용
+* `tmp_table_size`로 메모리 사이즈 설정 가능
+    * default : `16MB`
+    * tmp_table_size와 max_heap_table_size 중 작은 값으로 in-memory tmp table 최대 크기를 정의
+    * 한도를 초과하면 disk 기반 tmp table로 전환
+    * disk tmp table이 많아지면 성능 저하가 발생할 수 있음
