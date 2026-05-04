@@ -141,10 +141,24 @@ create index idx2 on t1(c3, c4);
 * 쿼리에 필요한 모든 컬럼이 인덱스에 포함된 상태
     * 별도의 물리적인 인덱스 종류가 아님
     * 인덱스만으로 쿼리를 처리할 수 있는 **역할(특성)**을 의미
-* 인덱스에 저장된 `key 값`이 곧 쿼리에 필요한 `데이터`가 되는 상태
-    * 별도로 테이블을 읽지 않아도 됨 → `back lookup` 불필요
-    * 디스크 I/O 감소 → 쿼리 성능 향상
- * 즉, **`Secondary index`가 쿼리에서 요구하는 컬럼 전부를 커버하고 있어서 `back lookup` 없이 인덱스만으로 쿼리 결과를 완전히 처리할 수 있는 상태**
+* 인덱스에 저장된 컬럼 값으로 쿼리 결과를 구성할 수 있는 상태
+    * data page(clustered index)에 접근하지 않아도 됨
+    * clustered index lookup(pk lookup) 불필요
+* pk 컬럼은 따로 인덱스에 포함하지 않아도 covering index 조건을 만족할 수 있음
+    * secondary index leaf node에는 항상 pk가 포함되어 있음
+* explain 실행 시 extra에 `Using index`가 표시됨
+* 장점
+    * 디스크 I/O 감소
+    * 쿼리 성능 향상
+* 단점
+    * 컬럼 수가 증가할수록 index size 증가
+    * buffer pool을 많이 차지하게 될 수 있음
+    * write 비용 증가
+    * 대부분의 경우 `select *` 쿼리는 covering index를 사용하기 어려움
+* 사용하는 경우
+    * read-heavy 환경
+    * 특정 조회 패턴이 반복되는 경우
+    * 조회 컬럼이 제한적인 경우
 ### Prefix Index
  * 문자열 컬럼의 앞부분(접두사)만 인덱스로 만드는 방식
  * 문자열의 일부만 인덱싱해서 저장 공간 절약
