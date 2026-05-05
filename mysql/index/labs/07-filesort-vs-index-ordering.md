@@ -54,7 +54,7 @@ rows            : 499206
 filtered        : 100
 Extra           : Using filesort -- filesort를 사용하여 정렬
 ```
-* Optimizer Trace 확인
+* [Optimizer Trace](../../optimization/optimizer-trace.md) 확인
     * 인덱스가 존재하지만 filesort를 사용하여 정렬한 원인을 찾기위해 분석
 ```sql
 set optimizer_trace = 'enabled=on';

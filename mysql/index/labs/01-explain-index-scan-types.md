@@ -194,7 +194,7 @@ Extra           : Using index for group-by -- 인덱스를 이용하여 group by
 * `skip scan for grouping on t1 using idx1`
     * 인덱스를 사용하여 다음 그룹으로 건너뛰며(skip) 탐색
     * loose index scan의 증거
-### optimizer trace 확인
+### [optimizer trace](../../optimization/optimizer-trace.md) 확인
 ```sql
 set optimizer_trace = 'enabled=on';
 select c1, min(c2) from t1 group by c1;
