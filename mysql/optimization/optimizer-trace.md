@@ -30,7 +30,7 @@ select * from t1 where c1 = 10;
 ```sql
 select * from information_schema.optimizer_trace\G
 ```
-## 결과 구조
+## 결과 구조 [→ 각 항목에 대한 자세한 해석](labs/optimizer-trace-and-cost-model.md)
 ```JSON
 {
   "steps": [

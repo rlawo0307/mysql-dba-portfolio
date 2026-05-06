@@ -1,6 +1,11 @@
 # 목차
 * Optimizer Trace + Cost Model 분석 실습
+  * 인덱스가 없는 경우(full table scan)
+  * 인덱스가 있는 경우(index range/ref scan)
 * 참고 자료
+  * [옵티마이저와 통계정보](../optimizer-statistics.md)
+  * [optimizer trace란](../optimizer-trace.md)
+  * [explain 해석](../explain.md)
 <br><br>
 
 # Optimizer Trace + Cost Model 분석 실습
@@ -33,7 +38,7 @@ from seq;
 set optimizer_trace="enabled=on"; -- optimizer trace 활성화
 set optimizer_trace_max_mem_size=1000000; -- 1MB로 저장 용량 확장
 ```
-## 인덱스가 없는 경우(Full Table Scan)
+## 인덱스가 없는 경우(full table scan)
 ```sql
 select * from t1 where c1 = 1;
 select trace from information_schema.optimizer_trace\G
@@ -328,7 +333,7 @@ trace: {
 ```
 </details>
 
-## 인덱스가 있는 경우
+## 인덱스가 있는 경우(index range/ref scan)
 ```sql
 create index idx1 on t1(c1); -- 인덱스 생성
 select * from t1 where c1 = 1;
@@ -676,3 +681,8 @@ trace: {
 </details>
 
 ## 결론
+옵티마이저는 단순히 인덱스 존재 여부로 실행 계획을 결정하지 않는다.
+
+인덱스가 없는 경우에는 full table scan만 후보로 고려되며, 조건(c1 = 1)은 실행 단계에서 필터링된다. 반면, 인덱스를 생성하면 옵티마이저는 해당 인덱스를 다양한 방식(range, ref 등)으로 활용할 수 있는지 평가한다. 이 과정에서 예상 row 수와 cost를 기반으로 각 access path를 비교하여 최적의 실행 계획을 선택한다.
+
+본 실습에서는 인덱스를 사용하는 방식 중 index range scan과 ref 중 cost가 더 낮은 ref 방식이 최종적으로 선택되었다. 즉, 옵티마이저의 실행 계획 선택은 인덱스 존재 여부가 아닌 cost 기반 의사결정에 의해 이루어진다는 것을 알 수 있다. 
