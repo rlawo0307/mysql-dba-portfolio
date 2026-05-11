@@ -27,7 +27,7 @@
 * Replication 및 Clustering - [replication-and-clustering.md](availability/replication-and-clustering.md)
 #### labs
 * 수동 failover 실습 - [failover.md](availability/labs/failover.md)
-* Replication 동작 중 binlog 흐름 확인 실습 - [replication-binlog-flow.md](availability/labs/replication-binlog-flow.md)
+* Replication 동작 중 binlog 흐름 확인 - [replication-binlog-flow.md](availability/labs/replication-binlog-flow.md)
 * Replication 실패 원인별 트러블슈팅 가이드 - [replication-failure-cases.md](availability/labs/replication-failure-cases.md)
 * replication 구축하기 - [replication-setup-and-verification.md](availability/labs/replication-setup-and-verification.md)
 ---
@@ -62,6 +62,10 @@
 * Join - [join-internal.md](optimization/join-internal.md)
 * Limit - [limit.md](optimization/limit.md)
 * 옵티마이저와 통계정보 - [optimizer-statistics.md](optimization/optimizer-statistics.md)
+#### labs
+* Histogram 유무에 따른 selectivity 추정 변화 확인 - [histogram-selectivity-estimation.md](optimization/labs/histogram-selectivity-estimation.md)
+* Optimizer Trace + Cost Model 분석 - [optimizer-trace-and-cost-model.md](optimization/labs/optimizer-trace-and-cost-model.md)
+* Stale Stat 상태에서 row estimate 동작 확인 - [stale-statistics-row-estimate.md](optimization/labs/stale-statistics-row-estimate.md)
 ---
 ### partitioning
 * Partitioned Index - [partition-index.md](partitioning/partition-index.md)
