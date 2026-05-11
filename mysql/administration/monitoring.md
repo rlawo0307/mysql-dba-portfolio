@@ -112,12 +112,13 @@ Id | User | Host | db | Command | Time | State | Info
     * `LOCK_MODE` : lock 종류
     * `LOCK_STATUS` : lock의 현재 상태
     * `LOCK_DATA` : lock이 걸린 실제 row 값
-## show engine innodb status
+## [show engine innodb status](show-engine-innodb-status-analysis.md)
 * InnoDB 엔진의 내부 상태를 종합적으로 확인할 수 있는 명령어
     * 현재 실행 중인 트랜잭션 상태
     * lock wait 및 blocking 상황
     * 정확히 어떤 row에 어떤 lock이 걸려 있는지
     * deadlock 발생 내역 등
+* 현재 시점의 snapshot (현재 순간 상태만 보임)
 * lock, 트랜잭션, deadlock 등 상세 분석에 사용되는 핵심 지표
 * 문제 상황의 내부 구조를 확인하기 위한 최종 분석 도구
 * 다른 도구로 확인한 내용을 기반으로, 실제 lock 구조를 최종적으로 검증할 때 사용

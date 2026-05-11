@@ -135,7 +135,7 @@ select ENGINE_TRANSACTION_ID as TX, concat(OBJECT_SCHEMA, '.', OBJECT_NAME) as O
 | 71292 | db1.t1 | PRIMARY    | RECORD    | X,REC_NOT_GAP | WAITING     | 1         | -- 같은 row에 대해 lock을 요청하다가 대기 중
 +-------+--------+------------+-----------+---------------+-------------+-----------+
 ```
-#### 5) lock 구조 및 상세 분석
+#### 5) lock 구조 및 상세 분석 [→ 각 섹션에 대한 구조 해부](../show-engine-innodb-status-analysis.md)
 ```sql
 show engine innodb status\G
 ```
