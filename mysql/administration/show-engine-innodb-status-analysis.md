@@ -197,7 +197,7 @@ srv_master_thread log flush and writes: 0
 * `srv_master_thread log flush and writes: 0`
     * background thread가 redo log flush/write를 수행한 횟수
     * 값이 0이면, 현재 특별한 flush 작업이 없는 상태
-    * 값이 높다면, background flush 작업이 활발한 상태
+    * 값이 높다면, background thread의 redo flush/write activity가 존재하는 상태
 ### 활용 케이스
 * flush가 밀리는 것 같을 때
 * background maintenance 상태 확인이 필요할 때
@@ -206,8 +206,13 @@ srv_master_thread log flush and writes: 0
 </details>
 <details><summary>SEMAPHORES 섹션 해석</summary>
 
+---
 ### SEMAPHORES
 * InnoDB 내부 thread끼리 resource 경합이 발생하는지 보여주는 영역
+    * mutex
+    * read/write lock
+    * spin wait
+    * OS wait
 ```sql
 ----------
 SEMAPHORES
@@ -216,12 +221,52 @@ OS WAIT ARRAY INFO: reservation count 182
 OS WAIT ARRAY INFO: signal count 181
 RW-shared spins 0, rounds 0, OS waits 0
 RW-excl spins 0, rounds 0, OS waits 0
-RW-sx spins 0, rounds 0, OS waits 0
+RW-sx spins 0, rounds 0, OS waits 0 
 Spin rounds per wait: 0.00 RW-shared, 0.00 RW-excl, 0.00 RW-sx
 ```
+* `reservation count`
+    * thread가 wait queue에 들어간 횟수
+    * resource를 바로 얻지 못해서 대기 상태에 진입한 횟수
+* `signal count`
+    * 대기 중이던 thread를 깨운 횟수
+    * 기다리던 thread가 다시 실행 가능 상태로 전환된 횟수
+    * 현재 reservation count(182)와 signal count(181)의 차이가 크지 않으므로 대기했던 thread 대부분이 정상적으로 처리된 것으로 해석 가능
+* `RW-shared` : read lock 경합 상태
+* `RW-excl` : write lock 경합 상태
+* `RW-sx` : InnoDB 내부 synchronization 관련 경합 상태
+* `spins`
+    * CPU busy waiting 횟수
+    * lock이 금방 풀릴 거라 예상하면 thread가 잠들지 않고 잠깐 CPU를 돌면서 기다림
+    * 즉, 짧은 active wait
+* `rounds`
+    * spin loop 반복 횟수
+    * 값이 크면 CPU를 많이 소모하면서 lock을 대기함을 의미
+* `OS waits`
+    * spin으로 해결이 안되서 OS scheduler에 의해 sleep한 횟수
+    * 진짜 block
+    * 값이 크면 contention이 발생하는 상태일 수 있음
+* `Spin rounds per wait`
+    * 실제 sleep에 들어가기 전, wait 1회 당 평균 spin 횟수
+    * 현재 값이 0이므로 spin contention이 없는 상태
+    * 값이 크면 CPU를 많이 소모하며 내부 contention이 발생하는 상태일 수 있음
+### 활용 케이스
+* 내부 contention이 의심될 때
+* CPU 사용량은 많은데 SQL workload는 낮을 때
+* mutex 병목이 의심될 때
+* latch contention 분석이 필요할 때
+---
 </details>
-<details><summary>TRANSACTIONS 섹션 해석</summary>
+<details><summary>(★) TRANSACTIONS 섹션 해석</summary>
 
+---
+### TRANSACTIONS
+* InnoDB 내부 트랜잭션 / lock / purge 상태를 보여주는 영역
+    * 현재 트랜잭션 상태
+    * lock 보유 여부
+    * lock wait 여부
+    * purge 진행 상태
+    * undo backlog
+    * 오래 열린 트랜잭션
 ```sql
 ------------
 TRANSACTIONS
@@ -247,9 +292,53 @@ LIST OF TRANSACTIONS FOR EACH SESSION:
 ---TRANSACTION 416934790788744, not started
 0 lock struct(s), heap size 1128, 0 row lock(s)
 ```
+* `Trx id counter`
+    * 현재 InnoDB transaction id counter
+    * InnoDB가 트랜잭션을 생성할 때 사용하는 내부 ID
+    * 새로운 트랜잭션 생성 시 증가
+* `Purge done for trx's n:o < 78908`
+    * purge가 어디까지 완료되었는지를 보여줌
+        * purge = 더 이상 필요 없는 undo version cleanup
+    * 현재 결과에서, 트랜잭션 78908 이전 undo 정리 완료
+    * 현재 transaction id counter(78910)와 purge 완료 지점(78908)의 차이가 작으므로 purge backlog가 거의 없는 것으로 해석 가능
+* `undo n:o < 0`
+    * undo purge 처리 관련 내부 정보
+    * 운영 관점에서는 보통 깊게 해석하지 않아도 됨
+* `state: running but idle`
+    * purge thread 상태
+    * 현재 결과에서는, thread는 살아있지만 할 일이 없음
+* `History list length 0`
+    * purge 대기 중인 undo version backlog
+    * 값이 0이면, undo backlog 없음. purge 정상
+    * 값이 크면, purge가 밀려 undo version이 누적된 상태
+        * 오래 열린 트랜잭션 때문에 purge가 진행되지 못하는 경우
+        * update/delete 작업이 많아 undo 생성 속도가 purge 처리 속도보다 빠른 경우 등
+* `LIST OF TRANSACTIONS FOR EACH SESSION:`
+    * 현재 InnoDB 세션별 트랜잭션 상태
+* `---TRANSACTION ..., not started`
+    * 세션은 존재하지만 아직 트랜잭션이 시작되지 않은 상태
+* `lock struct(s)` : lock 구조 개수
+* `heap size` : lock metadata 메모리 사용량
+* `row lock(s)` : row lock 개수
+### 활용 케이스
+* lock wait 분석
+* blocked된 트랜잭션 찾기
+* 오래 열린 트랜잭션 찾기
+* purge backlog 확인
+* undo 누적 상태 확인
+* MVCC snapshot 문제 의심
+---
 </details>
-<details><summary>FILE I/O 섹션 해석</summary>
+<details><summary>(★) FILE I/O 섹션 해석</summary>
 
+---
+### FILE I/O
+* InnoDB의 disk I/O thread 상태와 pending I/O 여부를 보여주는 영역
+    * read thread
+    * write thread
+    * insert buffer thread
+    * fsync 상태
+    *  pending I/O 상태
 ```sql
 --------
 FILE I/O
@@ -269,9 +358,53 @@ Pending flushes (fsync) log: 0; buffer pool: 0
 1100 OS file reads, 389 OS file writes, 179 OS fsyncs
 0.00 reads/s, 0 avg bytes/read, 0.00 writes/s, 0.00 fsyncs/s
 ```
+* `I/O thread n state`
+    * I/O thread의 현재 상태
+        * `read thread` : page read 요청 처리
+        * `write thread` : page write 요청 처리
+        * `insert buffer thread` : change buffer 관련 I/O 처리
+* 상태
+    * `waiting for i/o request` : 처리할 I/O 작업 자체가 없는 상태
+    * `waiting for completed aio requests` : I/O thread가 비동기 I/O 요청 완료를 기다리는 상태
+    * `doing async i/o` : 비동기 I/O 작업 처리 중
+    * `fsyncing` : disk flush 동기화 중
+    * `waiting for flush` : flush 관련 작업 대기
+    * 등
+* `Pending normal aio reads`
+    * 아직 완료되지 않은 비동기 read 요청 수
+    * InnoDB는 read I/O thread를 여러 개 사용하며, I/O thread 별 queue 상태
+        * 즉, 각 read thread 별 backlog 개수를 나타냄
+    * 실제 출력 결과에서도 read thread가 1개가 아닌 여러개(4개)인 것을 확인할 수 있음
+* `aio writes`
+    * 아직 완료되지 않은 비동기 write 요청 수
+    * write I/O thread 별 queue 상태
+* `ibuf aio reads`
+    * change buffer 전용 비동기 read queue 상태
+    * 비어있으면 pending이 없는 것으로 해석 가능
+* `Pending flushes (fsync)` : fsync 대기 상태
+    * `log` : redo log flush 관련 fsync 대기
+    * `buffer pool` : dirty page flush 관련 fsync 대기
+    * 값이 크면 flush backlog가 쌓인 상태로 해석 가능
+* `OS file reads`, `OS file writes`, `OS fsync`
+    * MySQL/InnoDB 시작 이후 누적된 file I/O 횟수
+    * 누적값이므로 값 자체보다는 증가 추세를 보는 것이 중요
+* `reads/s`, `writes/s`, `fsyncs/s` : 최근 측정 구간 기준 초당 I/O 발생량
+### 활용 케이스
+* disk I/O 병목이 의심될 때
+* pending read/write가 쌓이는지 확인할 때
+* fsync 지연이 의심될 때
+* buffer pool flush가 밀리는지 확인할 때
+* redo log flush 지연이 의심될 때
+---
 </details>
 <details><summary>INSERT BUFFER AND ADAPTIVE HASH INDEX 섹션 해석</summary>
 
+---
+### INSERT BUFFER AND ADAPTIVE HASH INDEX
+* change buffer와 AHI 상태를 보여주는 영역
+    * secondary index 변경 최적화 상태
+    * change buffer merge 상태
+    * AHI 사용 상태
 ```sql
 -------------------------------------
 INSERT BUFFER AND ADAPTIVE HASH INDEX
@@ -291,64 +424,114 @@ Hash table size 34679, node heap has 0 buffer(s)
 Hash table size 34679, node heap has 0 buffer(s)
 0.00 hash searches/s, 0.00 non-hash searches/s
 ```
+* `Ibuf`
+    * change buffer 상태
+    * secondary index page가 buffer pool에 없을 때 변경 사항을 임시로 저장해 random I/O를 줄이는 최적화 기능
+* `size` : 현재 change buffer 사용량
+* `free list len` : change buffer에서 사용 가능한 free entry 수
+* `seg size` : change buffer segment 전체 크기
+* `merges` : change buffer에 쌓인 변경 사항을 실제 index page에 반영한 횟수
+* `merged operations` : change buffer에서 실제 index page로 merge된 작업 수
+* `Hash table size` : AHI 내부 hash table 크기
+* `node heap has n buffer(s)` : AHI 관련 내부 메모리 사용 상태
+* `hash searches/s` : AHI를 사용한 lookup 횟수
+* `non-hash searches/s` : 일반 B+Tree lookup 횟수
+### 활용 케이스
+* secondary index write workload가 많을 때
+* change buffer merge backlog가 의심될 때
+* AHI 활용 여부 확인
+* 내부 index optimization 상태 확인
+---
 </details>
-<details><summary>LOG 섹션 해석</summary>
+<details><summary>(★) LOG 섹션 해석</summary>
 
+---
+### LOG
+* InnoDB redo log / checkpoint / flush 상태를 보여주는 영역
+    * redo log 기록 진행 상태
+    * log flush 상태
+    * dirty page flush 진행 상태
+    * checkpoint 위치
+    * redo pressure 확인
 ```sql
 ---
 LOG
 ---
-Log capacity                 104857600
-Log capacity used            104857600
-Log sequence number          12423264498
-Log buffer assigned up to    12423264498
-Log buffer completed up to   12423264498
-Log written up to            12423264498
-Log flushed up to            12423264498
-Added dirty pages up to      12423264498
-Pages flushed up to          12423264498
-Last checkpoint at           12423264498
-Log minimum file id is       3793
-Log maximum file id is       3793
-59 log i/o's done, 0.00 log i/o's/second
+Log capacity                 104857600   -- 전체 redo log capacity
+Log capacity used            104857600 
+Log sequence number          12423264498 -- 현재 redo log의 최종 위치. redo 기록이 어디까지 진행됐는지를 의미
+Log buffer assigned up to    12423264498 -- redo log buffer에 할당된 위치
+Log buffer completed up to   12423264498 -- redo 처리 완료 기준 위치
+Log written up to            12423264498 -- redo log file에 write 완료된 위치
+Log flushed up to            12423264498 -- disk flush 완료된 위치
+Added dirty pages up to      12423264498 -- dirty page 생성 기준 LSN
+Pages flushed up to          12423264498 -- dirty page flush 완료 기준 LSN
+Last checkpoint at           12423264498 -- 마지막 checkpoint 위치. recovery 기준점
+Log minimum file id is       3793        -- 현재 redo log 최소 file id
+Log maximum file id is       3793        -- 현재 redo log 최대 file id
+59 log i/o's done, 0.00 log i/o's/second -- redo 관련 I/O 누적 횟수 및 최근 초당 redo I/O 발생량
 ```
+* 해석 포인트
+    * `Log sequence number` ≈ `Log written up to` ≈ `Log flushed up to`
+        * redo 생성 / redo log file write / disk flush가 거의 같은 지점까지 진행된 상태
+        * 즉, redo 처리가 밀리지 않고 정상적으로 따라가고 있는 상태
+    * `Log sequence number`와 `Last checkpoint at`의 차이가 큰 경우
+        * redo log가 생성된 최신 위치와 crash recovery 기준점(checkpoint) 사이 차이가 큰 경우
+        * checkpoint lag가 큰 상태
+        * redo log는 계속 생성되고 있지만 checkpoint가 그만큼 따라오지 못하는 상태
+        * dirty page flush가 밀리거나 write workload가 높은 상황에서 발생할 수 있음
+        * 차이가 계속 커지면 crash recovery 시, 재적용해야 할 redo 범위가 커질 수 있음
+    * `Added dirty pages up to`와 `Pages flushed up to`의 차이가 큰 경우
+        * dirty page가 발생한 최신 LSN과 dirty page flush가 완료된 LSN의 차이가 큰 경우
+        * 메모리에는 변경된 dirty page가 많이 있는데, disk flush가 따라오지 못하는 상태
+        * dirty page flush backlog가 큰 상태
+        * buffer pool 내 modified page 증가 가능
+        * checkpoint 진행도 함께 늦어질 수 있음
+### 활용 케이스
+* redo log flush 지연이 의심될 때
+* checkpoint lag 확인
+* dirty page flush backlog 확인
+* write-heavy workload 상태 확인
+* recovery 부담이 커질 수 있는 상태 확인
+---
 </details>
-<details><summary>BUFFER POOL AND MEMORY 섹션 해석</summary>
+<details><summary>(★) BUFFER POOL AND MEMORY 섹션 해석</summary>
 
+---
+### BUFFER POOL AND MEMORY
+* InnoDB buffer pool 및 메모리 사용 상태를 보여주는 영역
+    * buffer pool 사용량
+    * free page 상태
+    * dirty page 상태
+    * pending read/write 여부
+    * page read/write activity
+    * LRU 상태
 ```sql
 ----------------------
 BUFFER POOL AND MEMORY
 ----------------------
-Total large memory allocated 0
-Dictionary memory allocated 511416
-Buffer pool size   8192
-Free buffers       7017
-Database pages     1171
-Old database pages 452
-Modified db pages  0
-Pending reads      0
-Pending writes: LRU 0, flush list 0, single page 0
-Pages made young 0, not young 0
-0.00 youngs/s, 0.00 non-youngs/s
-Pages read 1027, created 144, written 269
-0.00 reads/s, 0.00 creates/s, 0.00 writes/s
-No buffer pool page gets since the last printout
-Pages read ahead 0.00/s, evicted without access 0.00/s, Random read ahead 0.00/s
-LRU len: 1171, unzip_LRU len: 0
-I/O sum[0]:cur[0], unzip sum[0]:cur[0]
+Total large memory allocated 0                      -- InnoDB 내부 메모리 할당 정보
+Dictionary memory allocated 511416                  -- data dictionary 관련 메모리 사용량
+Buffer pool size   8192                             -- buffer pool 전체 page 수
+Free buffers       7017                             -- 아직 사용되지 않은 free page 수
+Database pages     1171                             -- 실제 data page 또는 index page로 사용 중인 page 수
+Old database pages 452                              -- LRU old sublist에 있는 page 수 
+Modified db pages  0                                -- dirty page 수
+Pending reads      0                                -- 아직 완료되지 않은 read 요청 수
+Pending writes: LRU 0, flush list 0, single page 0  -- flush 대기 중인 write 요청 수
+Pages made young 0, not young 0                     -- old page의 young 승격 통계
+0.00 youngs/s, 0.00 non-youngs/s                    -- 최근 buffer pool page access의 LRU 처리 통계
+Pages read 1027, created 144, written 269           -- 누적 page I/O 통계
+0.00 reads/s, 0.00 creates/s, 0.00 writes/s         -- 최근 초당 page activity
+No buffer pool page gets since the last printout    -- buffer pool access activity 요약 메시지
+Pages read ahead 0.00/s, evicted without access 0.00/s, Random read ahead 0.00/s -- read-ahead 및 미사용 eviction 통계
+LRU len: 1171, unzip_LRU len: 0                     -- LRU list 및 compressed page LRU 상태
+I/O sum[0]:cur[0], unzip sum[0]:cur[0] 
 ```
+* 해석 포인트
+    * `Free buffers`가 매우 낮으면, buffer pool 여유 공간이 부족한 상태이므로 새 page 확보를 위해 eviction/flush 압박 발생 가능
+    * `Modified db pages`가 크면, flush되지 않은 dirty page가 많이 쌓인 상태
+    * `Pending writes`가 크면, flush가 밀리고 있는 상태
+    * `evicted without access`가 높으면, 비효율적인 read-ahead 또는 cache 낭비 가능
+---
 </details>
-<details><summary>ROW OPERATIONS 섹션 해석</summary>
-
-```sql
---------------
-ROW OPERATIONS
---------------
-0 queries inside InnoDB, 0 queries in queue
-0 read views open inside InnoDB
-Process ID=1595, Main thread ID=135459107763904 , state=sleeping
-Number of rows inserted 0, updated 0, deleted 0, read 0
-0.00 inserts/s, 0.00 updates/s, 0.00 deletes/s, 0.00 reads/s
-Number of system rows inserted 17, updated 348, deleted 42, read 5109
-0.00 inserts/s, 0.00 updates/s, 0.00 deletes/s, 0.00 reads/s
-```
