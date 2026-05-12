@@ -13,6 +13,7 @@
 * MySQL 설치 및 초기 설정 - [installation.md](administration/installation.md)
 * 로그 - [logging.md](administration/logging.md)
 * 모니터링 - [monitoring.md](administration/monitoring.md)
+* SHOW ENGINE INNODB STATUS 구조 해부 - [show-engine-innodb-status-analysis.md](administration/show-engine-innodb-status-analysis.md)
 * 사용자 관리 - [user-account.md](administration/user-account.md)
 #### labs
 * 설정 파일 및 시스템 변수 확인 - [config-and-variable-check.md](administration/labs/config-and-variable-check.md)
@@ -62,6 +63,7 @@
 * Join - [join-internal.md](optimization/join-internal.md)
 * Limit - [limit.md](optimization/limit.md)
 * 옵티마이저와 통계정보 - [optimizer-statistics.md](optimization/optimizer-statistics.md)
+* Optimizer Trace - [optimizer-trace](optimization/optimizer-trace.md)
 #### labs
 * Histogram 유무에 따른 selectivity 추정 변화 확인 - [histogram-selectivity-estimation.md](optimization/labs/histogram-selectivity-estimation.md)
 * Optimizer Trace + Cost Model 분석 - [optimizer-trace-and-cost-model.md](optimization/labs/optimizer-trace-and-cost-model.md)
