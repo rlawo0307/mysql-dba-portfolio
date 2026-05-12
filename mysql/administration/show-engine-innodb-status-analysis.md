@@ -28,7 +28,7 @@ LOG                                   → redo log / checkpoint 상태
 BUFFER POOL AND MEMORY                → buffer pool 상태
 ROW OPERATIONS                        → row-level workload 상태
 ```
-## 섹션 별 예시 결과 및 해석 
+## 섹션 별 예시 결과 및 해석 (정상 상태)
 <details><summary>전체 show engine innodb status 결과</summary>
 
 ```sql
@@ -533,5 +533,327 @@ I/O sum[0]:cur[0], unzip sum[0]:cur[0]
     * `Modified db pages`가 크면, flush되지 않은 dirty page가 많이 쌓인 상태
     * `Pending writes`가 크면, flush가 밀리고 있는 상태
     * `evicted without access`가 높으면, 비효율적인 read-ahead 또는 cache 낭비 가능
+---
+</details>
+
+## 섹션 별 예시 결과 및 해석 (deadlock 발생 시)
+```sql
+create table t1 (id int primary key, c1 int);
+insert into t1 values (1, 100), (2, 200);
+
+-- session 1
+start transaction;
+update t1 set c1 = c1 + 1 where id = 1;
+
+-- session 2
+start transaction;
+update t1 set c1 = c1 + 1 where id = 2;
+
+-- session 1
+update t1 set c1 = c1 + 1 where id = 2; -- wait
+
+-- session 2
+update t1 set c1 = c1 + 1 where id = 1; -- ERROR 1213 (40001): Deadlock found when trying to get lock
+```
+
+<details><summary>전체 show engine innodb status 결과</summary>
+
+```sql
+*************************** 1. row ***************************
+  Type: InnoDB
+  Name: 
+Status: 
+=====================================
+2026-05-12 08:10:43 138848807909056 INNODB MONITOR OUTPUT
+=====================================
+Per second averages calculated from the last 40 seconds
+-----------------
+BACKGROUND THREAD
+-----------------
+srv_master_thread loops: 5 srv_active, 0 srv_shutdown, 620 srv_idle
+srv_master_thread log flush and writes: 0
+----------
+SEMAPHORES
+----------
+OS WAIT ARRAY INFO: reservation count 385
+OS WAIT ARRAY INFO: signal count 380
+RW-shared spins 0, rounds 0, OS waits 0
+RW-excl spins 0, rounds 0, OS waits 0
+RW-sx spins 0, rounds 0, OS waits 0
+Spin rounds per wait: 0.00 RW-shared, 0.00 RW-excl, 0.00 RW-sx
+------------------------
+LATEST DETECTED DEADLOCK
+------------------------
+2026-05-12 08:09:52 138849335457472
+*** (1) TRANSACTION:
+TRANSACTION 79961, ACTIVE 40 sec starting index read
+mysql tables in use 1, locked 1
+LOCK WAIT 3 lock struct(s), heap size 1128, 2 row lock(s), undo log entries 1
+MySQL thread id 14, OS thread handle 138848810022592, query id 20 localhost user1 updating
+update t1
+set c1 = c1 + 1
+where id = 2
+
+*** (1) HOLDS THE LOCK(S):
+RECORD LOCKS space id 480 page no 4 n bits 72 index PRIMARY of table `db1`.`t1` trx id 79961 lock_mode X locks rec but not gap
+Record lock, heap no 2 PHYSICAL RECORD: n_fields 4; compact format; info bits 0
+ 0: len 4; hex 80000001; asc     ;;
+ 1: len 6; hex 000000013859; asc     8Y;;
+ 2: len 7; hex 02000001251172; asc     % r;;
+ 3: len 4; hex 80000065; asc    e;;
+
+
+*** (1) WAITING FOR THIS LOCK TO BE GRANTED:
+RECORD LOCKS space id 480 page no 4 n bits 72 index PRIMARY of table `db1`.`t1` trx id 79961 lock_mode X locks rec but not gap waiting
+Record lock, heap no 3 PHYSICAL RECORD: n_fields 4; compact format; info bits 0
+ 0: len 4; hex 80000002; asc     ;;
+ 1: len 6; hex 00000001385a; asc     8Z;;
+ 2: len 7; hex 01000000d612de; asc        ;;
+ 3: len 4; hex 800000c9; asc     ;;
+
+
+*** (2) TRANSACTION:
+TRANSACTION 79962, ACTIVE 18 sec starting index read
+mysql tables in use 1, locked 1
+LOCK WAIT 3 lock struct(s), heap size 1128, 2 row lock(s), undo log entries 1
+MySQL thread id 15, OS thread handle 138848808965824, query id 21 localhost user1 updating
+update t1
+set c1 = c1 + 1
+where id = 1
+
+*** (2) HOLDS THE LOCK(S):
+RECORD LOCKS space id 480 page no 4 n bits 72 index PRIMARY of table `db1`.`t1` trx id 79962 lock_mode X locks rec but not gap
+Record lock, heap no 3 PHYSICAL RECORD: n_fields 4; compact format; info bits 0
+ 0: len 4; hex 80000002; asc     ;;
+ 1: len 6; hex 00000001385a; asc     8Z;;
+ 2: len 7; hex 01000000d612de; asc        ;;
+ 3: len 4; hex 800000c9; asc     ;;
+
+
+*** (2) WAITING FOR THIS LOCK TO BE GRANTED:
+RECORD LOCKS space id 480 page no 4 n bits 72 index PRIMARY of table `db1`.`t1` trx id 79962 lock_mode X locks rec but not gap waiting
+Record lock, heap no 2 PHYSICAL RECORD: n_fields 4; compact format; info bits 0
+ 0: len 4; hex 80000001; asc     ;;
+ 1: len 6; hex 000000013859; asc     8Y;;
+ 2: len 7; hex 02000001251172; asc     % r;;
+ 3: len 4; hex 80000065; asc    e;;
+
+*** WE ROLL BACK TRANSACTION (2)
+------------
+TRANSACTIONS
+------------
+Trx id counter 79964
+Purge done for trx's n:o < 79964 undo n:o < 0 state: running but idle
+History list length 0
+LIST OF TRANSACTIONS FOR EACH SESSION:
+---TRANSACTION 420324763603696, not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION 420324763602888, not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION 420324763601272, not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION 420324763600464, not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION 420324763599656, not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION 420324763598848, not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION 420324763597232, not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION 420324763598040, not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION 420324763596424, not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION 79961, ACTIVE 91 sec
+3 lock struct(s), heap size 1128, 2 row lock(s), undo log entries 2
+MySQL thread id 14, OS thread handle 138848810022592, query id 20 localhost user1
+--------
+FILE I/O
+--------
+I/O thread 0 state: waiting for completed aio requests (insert buffer thread)
+I/O thread 1 state: waiting for completed aio requests (read thread)
+I/O thread 2 state: waiting for completed aio requests (read thread)
+I/O thread 3 state: waiting for completed aio requests (read thread)
+I/O thread 4 state: waiting for completed aio requests (read thread)
+I/O thread 5 state: waiting for completed aio requests (write thread)
+I/O thread 6 state: waiting for completed aio requests (write thread)
+I/O thread 7 state: waiting for completed aio requests (write thread)
+I/O thread 8 state: waiting for completed aio requests (write thread)
+Pending normal aio reads: [0, 0, 0, 0] , aio writes: [0, 0, 0, 0] ,
+ ibuf aio reads:
+Pending flushes (fsync) log: 0; buffer pool: 0
+1055 OS file reads, 632 OS file writes, 340 OS fsyncs
+0.00 reads/s, 0 avg bytes/read, 0.69 writes/s, 0.35 fsyncs/s
+-------------------------------------
+INSERT BUFFER AND ADAPTIVE HASH INDEX
+-------------------------------------
+Ibuf: size 1, free list len 2162, seg size 2164, 0 merges
+merged operations:
+ insert 0, delete mark 0, delete 0
+discarded operations:
+ insert 0, delete mark 0, delete 0
+Hash table size 34679, node heap has 3 buffer(s)
+Hash table size 34679, node heap has 0 buffer(s)
+Hash table size 34679, node heap has 0 buffer(s)
+Hash table size 34679, node heap has 1 buffer(s)
+Hash table size 34679, node heap has 0 buffer(s)
+Hash table size 34679, node heap has 0 buffer(s)
+Hash table size 34679, node heap has 0 buffer(s)
+Hash table size 34679, node heap has 0 buffer(s)
+0.10 hash searches/s, 0.30 non-hash searches/s
+---
+LOG
+---
+Log capacity                 104857600
+Log capacity used            104857600
+Log sequence number          12423395509
+Log buffer assigned up to    12423395509
+Log buffer completed up to   12423395509
+Log written up to            12423395509
+Log flushed up to            12423395509
+Added dirty pages up to      12423395509
+Pages flushed up to          12423395509
+Last checkpoint at           12423395509
+Log minimum file id is       3793
+Log maximum file id is       3793
+107 log i/o's done, 0.05 log i/o's/second
+----------------------
+BUFFER POOL AND MEMORY
+----------------------
+Total large memory allocated 0
+Dictionary memory allocated 514112
+Buffer pool size   8192
+Free buffers       7011
+Database pages     1177
+Old database pages 454
+Modified db pages  0
+Pending reads      0
+Pending writes: LRU 0, flush list 0, single page 0
+Pages made young 0, not young 0
+0.00 youngs/s, 0.00 non-youngs/s
+Pages read 1028, created 149, written 413
+0.00 reads/s, 0.00 creates/s, 0.49 writes/s
+Buffer pool hit rate 1000 / 1000, young-making rate 0 / 1000 not 0 / 1000
+Pages read ahead 0.00/s, evicted without access 0.00/s, Random read ahead 0.00/s
+LRU len: 1177, unzip_LRU len: 0
+I/O sum[0]:cur[0], unzip sum[0]:cur[0]
+--------------
+ROW OPERATIONS
+--------------
+0 queries inside InnoDB, 0 queries in queue
+0 read views open inside InnoDB
+Process ID=1562, Main thread ID=138849095243456 , state=sleeping
+Number of rows inserted 2, updated 3, deleted 0, read 3
+0.00 inserts/s, 0.00 updates/s, 0.00 deletes/s, 0.00 reads/s
+Number of system rows inserted 25, updated 359, deleted 27, read 5112
+0.00 inserts/s, 0.00 updates/s, 0.00 deletes/s, 0.45 reads/s
+----------------------------
+END OF INNODB MONITOR OUTPUT
+============================
+
+1 row in set (0.00 sec)
+```
+</details>
+<details><summary>(★) LATEST DETECTED DEADLOCK 섹션 해석</summary>
+
+---
+### LATEST DETECTED DEADLOCK
+* 가장 최근에 감지된 deadlock 정보를 보여주는 영역
+    * deadlock에 참여한 트랜잭션
+    * 각 트랜잭션이 보유한 lock
+    * 기다리는 lock
+    * rollback 대상 트랜잭션 등
+* 정상 상태에서는 해당 섹션이 결과에 출력되지 않을 수 있음
+```sql
+------------------------
+LATEST DETECTED DEADLOCK
+------------------------
+2026-05-12 08:09:52 138849335457472 -- deadlock이 감지된 시각과 OS thread handle
+```
+```sql
+*** (1) TRANSACTION: -- deadlock에 참여한 트랜잭션 1
+TRANSACTION 79961, ACTIVE 40 sec starting index read -- 트랜잭션 id 79961이 40초 동안 인덱스를 통한 row access 과정에서 lock을 기다리고 있음
+mysql tables in use 1, locked 1 -- 1개 table을 사용중이고 lock과 관련된 상태임
+LOCK WAIT 3 lock struct(s), heap size 1128, 2 row lock(s), undo log entries 1 -- LOCK WAIT : 현재 트랜잭션이 lock을 기다리는 상태
+                                                                              -- 3 lock struct(s) : 트랜잭션이 가진 lock 구조 개수 = lock metadata 개수
+                                                                              -- 2 row lock(s) : 트랜잭션과 관련된 row lock 개수(현재 1개는 보유중, 1개는 기다리는 중 = 총 2개)
+                                                                              -- undo log entries 1 : 트랜잭션이 변경한 내용에 대한 undo log entry 수
+MySQL thread id 14, OS thread handle 138848810022592, query id 20 localhost user1 updating
+update t1
+set c1 = c1 + 1
+where id = 2
+-- MySQL thread id : MySQL 세션 thread id. show processlist의 id와 연결해서 어떤 세션인지 확인 가능
+-- user1@localhost 계정이 update를 수행 중에 lock wait 상태가 됨
+
+*** (1) HOLDS THE LOCK(S): -- 트랜잭션이 현재 보유하고 있는 lock 정보
+RECORD LOCKS space id 480 page no 4 n bits 72 index PRIMARY of table `db1`.`t1` trx id 79961 lock_mode X locks rec but not gap -- 어느 page의 어떤 종류의 lock인가를 설명하는 공통 metadata
+-- space id : 이 record가 저장된 tablespace id
+-- page no : tablespace 내부 page 번호
+-- n bits : 해당 page의 record lock bitmap 크기
+-- lock_mode X : exclusive lock. update를 위해 row를 배타적으로 잠근 상태
+-- locks rec but not gap : gap lock이 아니라 record lock
+Record lock, heap no 2 PHYSICAL RECORD: n_fields 4; compact format; info bits 0
+-- heap no : page 내부에서 해당 record의 물리적 위치 번호. 사용자 입장에서는 row 식별 보조 정보로 보면 됨
+-- PHYSICAL RECORD : page 안에 저장된 row record를 physical record 형태로 아래와 같이 보여줌
+-- n_fields : physical record field 개수 (사용자 컬럼 + InnoDB 내부 metadata)
+-- compact format : MySQL/InnoDB row format 종류 (redundant/compact/dynamic/compressed)
+-- info bits : record의 internal flag. 현재 0은 특별한 상태 없음을 의미
+
+ 0: len 4; hex 80000001; asc     ;;             -- hex 80000001 = 1
+                                                -- 즉, id(pk) = 1로 해석 가능
+
+ 1: len 6; hex 000000013859; asc     8Y;;       -- DB_TRX_ID (해당 row를 마지막으로 변경한 transaction id)
+                                                -- 사용자 컬럼 아님
+
+ 2: len 7; hex 02000001251172; asc     % r;;    -- DB_ROLL_PTR (undo log 위치)
+                                                -- 사용자 컬럼 아님(내부 관리용 컬럼)
+
+ 3: len 4; hex 80000065; asc    e;;             -- 두번째 사용자 컬럼 값
+                                                -- hex 80000065 = 101
+                                                -- 즉, c1 = 101로 해석 가능
+
+
+*** (1) WAITING FOR THIS LOCK TO BE GRANTED: -- 트랜잭션이 획득하려고 기다리는 lock 정보
+RECORD LOCKS space id 480 page no 4 n bits 72 index PRIMARY of table `db1`.`t1` trx id 79961 lock_mode X locks rec but not gap waiting -- 마지막에 waiting이 붙어있으면 아직 lock을 얻지 못한 상태
+                                          -- 위의 보유하고 있는 lock 정보와 똑같아 보이지만 아래 physical record 부분이 다름
+Record lock, heap no 3 PHYSICAL RECORD: n_fields 4; compact format; info bits 0
+ 0: len 4; hex 80000002; asc     ;; -- hex 80000002 = 2. 즉, id(pk) = 2인 row
+ 1: len 6; hex 00000001385a; asc     8Z;;
+ 2: len 7; hex 01000000d612de; asc        ;;
+ 3: len 4; hex 800000c9; asc     ;; -- hex 800000c9 = 201. 즉 c1 = 201
+```
+```sql
+*** (2) TRANSACTION: -- deadlock에 참여한 트랜잭션 2
+TRANSACTION 79962, ACTIVE 18 sec starting index read
+mysql tables in use 1, locked 1
+LOCK WAIT 3 lock struct(s), heap size 1128, 2 row lock(s), undo log entries 1
+MySQL thread id 15, OS thread handle 138848808965824, query id 21 localhost user1 updating
+update t1
+set c1 = c1 + 1
+where id = 1
+
+*** (2) HOLDS THE LOCK(S):
+RECORD LOCKS space id 480 page no 4 n bits 72 index PRIMARY of table `db1`.`t1` trx id 79962 lock_mode X locks rec but not gap
+Record lock, heap no 3 PHYSICAL RECORD: n_fields 4; compact format; info bits 0
+ 0: len 4; hex 80000002; asc     ;; -- id(pk) = 2 인 row에 대한 lock을 잡고 있음
+ 1: len 6; hex 00000001385a; asc     8Z;;
+ 2: len 7; hex 01000000d612de; asc        ;;
+ 3: len 4; hex 800000c9; asc     ;;
+
+
+*** (2) WAITING FOR THIS LOCK TO BE GRANTED:
+RECORD LOCKS space id 480 page no 4 n bits 72 index PRIMARY of table `db1`.`t1` trx id 79962 lock_mode X locks rec but not gap waiting
+Record lock, heap no 2 PHYSICAL RECORD: n_fields 4; compact format; info bits 0
+ 0: len 4; hex 80000001; asc     ;; -- id(pk) = 1인 row에 대한 lock을 기다리는 중
+ 1: len 6; hex 000000013859; asc     8Y;;
+ 2: len 7; hex 02000001251172; asc     % r;;
+ 3: len 4; hex 80000065; asc    e;;
+
+*** WE ROLL BACK TRANSACTION (2) -- deadlock을 해결하기 위해 트랜잭션 79962를 victim transaction으로 선택하여 rollback
+```
+### 활용 케이스
+* deadlock 원인 분석
+* 어떤 트랜잭션이 rollback 되었는지 확인
+* lock 획득 순서 분석
 ---
 </details>
