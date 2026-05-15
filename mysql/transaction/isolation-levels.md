@@ -1,6 +1,6 @@
 # 트랜잭션 이상 현상(Anomaly)
 * 여러 트랜잭션이 동시에 실행될 때, 적절한 격리가 이루어지지 않으면 데이터의 일관성이 깨지는 현상이 발생할 수 있음
-* 종류
+* 종류 [→ 이상 현상 재현 및 해결](labs/transaction-anomaly-experiment.md)
     * `Dirty Read` : commit되지 않은 데이터를 다른 트랜잭션이 읽음
     * `Non-Repeatable Read` : 같은 row를 두 번 읽었는데 값이 달라짐
     * `Phantom Read` : 같은 조건으로 조회했는데 행의 개수가 달라짐
