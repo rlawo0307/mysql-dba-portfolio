@@ -94,9 +94,11 @@
 * 트랜잭션 기본 개념 - [transaction-basics.md](transaction/transaction-basics.md)
 * 트랜잭션 메커니즘 (undo / redo / MVCC) - [transaction-mechanism.md](transaction/transaction-mechanism.md)
 #### labs
+* Gap Lock 범위 시각화 - [gap-lock-range-visualization.md](transaction/labs/gap-lock-range-visualization.md)
 * Isolation level 별 동작 비교 - [isolation-level-comparison.md](transaction/labs/isolation-level-comparison.md)
 * 인덱스 별 lock 범위 비교 - [locking-index-behavior.md](transaction/labs/locking-index-behavior.md)
 * Limit 사용 여부에 따른 lock 범위 비교 - [locking-limit-behavior.md](transaction/labs/locking-limit-behavior.md)
 * Order by 방식에 따른 lock 범위 비교 - [locking-order-by-behavior.md](transaction/labs/locking-order-by-behavior.md)
 * MVCC snapshot 생성 시점 및 동작 확인 - [mvcc-snapshot-check.md](transaction/labs/mvcc-snapshot-check.md)
+* Transaction Anomaly 재현 및 해결 - [transaction-anomaly-experiment.md](transaction/labs/transaction-anomaly-experiment.md)
 * 트랜잭션 lifecycle 확인 - [transaction-implicit-commit.md](transaction/labs/transaction-implicit-commit.md)
