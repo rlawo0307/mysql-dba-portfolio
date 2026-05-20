@@ -132,7 +132,7 @@ select * from t1 where c1 = 10 for update;
 ```
 ### Gap Lock
 * index 범위(gap)에 lock을 거는 방식
-* lock 범위 : `(이전 인덱스 키, 특정 인덱스 키)`
+* lock 범위 : `(이전 인덱스 키, 특정 인덱스 키)` [→ gap lock 범위 시각화](labs/gap-lock-range-visualization.md)
 * lock된 범위 내에는 다른 트랜잭션이 데이터를 insert할 수 없음
 * 주로 next-key lock의 일부로 사용됨
 * range 조건 결과 row가 없는 경우 gap lock만 설정될 수 있음
@@ -151,7 +151,7 @@ select * from t1 where c1 between 10 and 20 for update;
     * 새로운 종류의 lock이 아님
     * record lock과 gap lock을 동시에 적용하는 방식
 * 특정 index record와 앞쪽 gap에 lock을 거는 방식
-* lock 범위 : `(이전 인덱스 키, 특정 인덱스 키]`
+* lock 범위 : `(이전 인덱스 키, 특정 인덱스 키]` [→ gap lock 범위 시각화](labs/gap-lock-range-visualization.md)
 * **InnoDB에서 range scan 시 기본적으로 사용되는 locking 방식**
     * **phantom read를 방지하기 위해 사용**
 ```sql
