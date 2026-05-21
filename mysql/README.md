@@ -9,6 +9,7 @@
 
 # 폴더 구성
 ### administration
+* MySQL 설정 관리 - [configuration-management.md](administration/configuration-management.md)
 * 데이터베이스 관리 - [database-basic-operations.md](administration/database-basic-operations.md)
 * MySQL 설치 및 초기 설정 - [installation.md](administration/installation.md)
 * 로그 - [logging.md](administration/logging.md)
@@ -16,7 +17,6 @@
 * SHOW ENGINE INNODB STATUS 구조 해부 - [show-engine-innodb-status-analysis.md](administration/show-engine-innodb-status-analysis.md)
 * 사용자 관리 - [user-account.md](administration/user-account.md)
 #### labs
-* 설정 파일 및 시스템 변수 확인 - [config-and-variable-check.md](administration/labs/config-and-variable-check.md)
 * Lock Wait 상황 분석 - [monitoring-routine.md](administration/labs/monitoring-routine.md)
 * MySQL user@host 매칭 우선순위 확인 - [mysql-user-host-matching.md](administration/labs/mysql-user-host-matching.md)
 * SQL Security 옵션 (DEFINER / INVOKER) 비교 - [sql-security-option-comparion.md](administration/labs/sql-security-option-comparion.md)
