@@ -23,6 +23,7 @@
 * 스토리지 엔진 별 트랜잭션 지원 여부 비교 - [storage-engine-comparison.md](administration/labs/storage-engine-comparison.md)
 ---
 ### availability
+* Backup & Recovery - [backup-and-recovery.md](availability/backup-and-recovery.md)
 * Binlog & GTID - [binlog-and-GTID.md](availability/binlog-and-GTID.md)
 * Failover - [failover.md](availability/failover.md)
 * Replication 및 Clustering - [replication-and-clustering.md](availability/replication-and-clustering.md)
