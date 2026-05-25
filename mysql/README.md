@@ -30,6 +30,7 @@
 #### labs
 * 수동 failover 실습 - [failover.md](availability/labs/failover.md)
 * mysqldump를 이용한 logical backup & restore - [mysqldump-backup-restore.md](availability/labs/mysqldump-backup-restore.md)
+* PITR(Point-in-Time Recovery) 재현 실습 - [PITR.md](availability/labs/PITR.md)
 * Replication 동작 중 binlog 흐름 확인 - [replication-binlog-flow.md](availability/labs/replication-binlog-flow.md)
 * Replication 실패 원인별 트러블슈팅 가이드 - [replication-failure-cases.md](availability/labs/replication-failure-cases.md)
 * replication 구축하기 - [replication-setup-and-verification.md](availability/labs/replication-setup-and-verification.md)
