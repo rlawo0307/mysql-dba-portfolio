@@ -13,6 +13,7 @@
 * 데이터베이스 관리 - [database-basic-operations.md](administration/database-basic-operations.md)
 * MySQL 설치 및 초기 설정 - [installation.md](administration/installation.md)
 * 로그 - [logging.md](administration/logging.md)
+* 마이그레이션 - [migration.md](administration/migration.md)
 * 모니터링 - [monitoring.md](administration/monitoring.md)
 * SHOW ENGINE INNODB STATUS 구조 해부 - [show-engine-innodb-status-analysis.md](administration/show-engine-innodb-status-analysis.md)
 * 사용자 관리 - [user-account.md](administration/user-account.md)
