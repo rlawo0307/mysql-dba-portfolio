@@ -9,6 +9,7 @@
 
 # 폴더 구성
 ### administration
+* Access Control (계정, 권한, role) - [access-control.md](administration/access-control.md)
 * MySQL 설정 관리 - [configuration-management.md](administration/configuration-management.md)
 * 데이터베이스 관리 - [database-basic-operations.md](administration/database-basic-operations.md)
 * MySQL 설치 및 초기 설정 - [installation.md](administration/installation.md)
@@ -16,7 +17,6 @@
 * 마이그레이션 - [migration.md](administration/migration.md)
 * 모니터링 - [monitoring.md](administration/monitoring.md)
 * SHOW ENGINE INNODB STATUS 구조 해부 - [show-engine-innodb-status-analysis.md](administration/show-engine-innodb-status-analysis.md)
-* 사용자 관리 - [user-account.md](administration/user-account.md)
 #### labs
 * Lock Wait 상황 분석 - [monitoring-routine.md](administration/labs/monitoring-routine.md)
 * MySQL to Oracle Migration - [mysql-to-oracle-migration.md](administration/labs/mysql-to-oracle-migration.md)
@@ -82,6 +82,7 @@
 * Partition Pruning 성능 실험 - [partition-pruning-performance.md](partitioning/labs/partition-pruning-performance.md)
 ---
 ### sql-commands
+* 계정 관리 - [account-management.md](sql-commands/account-management.md)
 * CTE - [CTE.md](sql-commands/CTE.md)
 * SQL 명령어 - [sql-command-overview.md](sql-commands/sql-command-overview.md)
 * DCL - [sql-dcl.md](sql-commands/sql-dcl.md)
