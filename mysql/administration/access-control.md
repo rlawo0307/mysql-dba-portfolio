@@ -58,10 +58,6 @@ ex) 접속 요청 계정 : 'user1'@'192.168.111.130'
 * 상위 범위에서 부여된 권한은 하위 범위에 자동 적용됨
     * global → database → table → column
     * routine은 별도의 객체 유형으로 위 계층 구조에 포함되지 않음
-* [권한 관리](../sql-commands/sql-dcl.md)
-    * 권한 부여 (grant)
-    * 권한 회수 (revoke)
-    * 권한 확인
 ## 주요 권한    
 |                              |의미|global|database|table|column|routine|
 |------------------------------|---|:--:|:------:|:---:|:----:|:-----:|
@@ -90,3 +86,49 @@ ex) 접속 요청 계정 : 'user1'@'192.168.111.130'
 <br>
 
 # 역할 (Role)
+* 여러 권한을 하나의 묶음으로 관리하기 위한 객체
+* MySQL 8.0 부터 지원
+* 사용자에게 직접 권한을 부여하는 대신 role에 권한을 부여한 후 사용자에게 할당 가능
+* 다수 사용자의 권한 관리를 단순화
+    * 하나의 role에 여러 권한 부여 가능
+    * 하나의 사용자에게 여러 role 부여 가능
+    * role끼리 계층적으로 부여 가능
+    * 활성화된 role의 권한만 사용 가능
+* 권한 변경 시 사용자별 권한을 수정하는 대신 role만 수정하면 됨
+* role을 부여받아도 자동으로 활성화되는 것은 아님
+    * 로그인 시 자동 활성화하려면 `default role` 설정 필요
+```text
+read_only_role
+ └─ select
+
+developer_role
+ ├─ read_only_role
+ ├─ insert
+ ├─ update
+ └─ delete
+
+schema_manager_role
+ ├─ create
+ ├─ alter
+ └─ drop
+
+dba_role
+ ├─ developer_role
+ ├─ create user
+ ├─ process
+ └─ reload
+```
+```text
+user1
+ ├─ developer_role      → select, insert, update, delete
+ └─ schema_manager_role → create, alter, drop 
+
+user2
+ ├─ read_only_role      → select
+ └─ schema_manager_role → create, alter, drop 
+
+user3
+ └─ dba_role → select, insert, update, delete,
+             → create user, process, reload
+ ```
+#### ※ role 관리 문법 및 사용은 [role-management](../sql-commands/role-management) 문서 참고

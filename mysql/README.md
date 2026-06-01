@@ -84,6 +84,7 @@
 ### sql-commands
 * 계정 관리 - [account-management.md](sql-commands/account-management.md)
 * CTE - [CTE.md](sql-commands/CTE.md)
+* Role 관리 - [role-management](sql-commands/role-management.md)
 * SQL 명령어 - [sql-command-overview.md](sql-commands/sql-command-overview.md)
 * DCL - [sql-dcl.md](sql-commands/sql-dcl.md)
 * DDL - [sql-ddl.md](sql-commands/sql-ddl.md)
