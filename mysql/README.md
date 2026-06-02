@@ -21,6 +21,7 @@
 * Lock Wait 상황 분석 - [monitoring-routine.md](administration/labs/monitoring-routine.md)
 * MySQL to Oracle Migration - [mysql-to-oracle-migration.md](administration/labs/mysql-to-oracle-migration.md)
 * MySQL user@host 매칭 우선순위 확인 - [mysql-user-host-matching.md](administration/labs/mysql-user-host-matching.md)
+* Slow Query Log 분석 - [slow-query-log-analysis.md](administration/labs/slow-query-log-analysis.md)
 * SQL Security 옵션 (DEFINER / INVOKER) 비교 - [sql-security-option-comparion.md](administration/labs/sql-security-option-comparion.md)
 * 스토리지 엔진 별 트랜잭션 지원 여부 비교 - [storage-engine-comparison.md](administration/labs/storage-engine-comparison.md)
 ---
