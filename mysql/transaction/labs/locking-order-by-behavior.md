@@ -7,7 +7,7 @@
     * 인덱스가 탐색 + 정렬에 사용되는 경우
 * 참고 자료
     * [→ 인덱스 정렬 방식 (filesort / index driven sort)](../../index/index-basics.md)
-    * [→ 인덱스 정렬 방식 (filesort / index driven sort) 비교 실습](../../index/labs/07-filesort-vs-index-ordering.md)
+    * [→ 인덱스 정렬 방식 (filesort / index driven sort) 비교 실습](../../index/labs/filesort-vs-index-ordering.md)
     * [→ 인덱스별 lock 범위 비교 실습](../labs/locking-index-behavior.md)
 <br><br>
 

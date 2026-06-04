@@ -1,6 +1,6 @@
 # 계정 생성하기 (CREATE USER)
 * 새로운 MySQL 계정 생성
-* 계정 생성 [권한](../administration/privilege.md) 필요
+* 계정 생성 [권한](../administration/access-control.md) 필요
 * 계정 생성만 수행하며 권한은 자동으로 부여되지 않음
 * 동일한 사용자명이라도 host가 다르면 다른 계정으로 취급
 ```sql

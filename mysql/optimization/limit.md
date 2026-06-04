@@ -31,4 +31,4 @@ limit offset row_count
 * `offset`이 클수록 선형적으로 느려짐
 <br>
 
-# [ORDER BY + LIMIT 실습](../index/labs/07-filesort-vs-index-ordering.md)
+# [ORDER BY + LIMIT 실습](../index/labs/filesort-vs-index-ordering.md)

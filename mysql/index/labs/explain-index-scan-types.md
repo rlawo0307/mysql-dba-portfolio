@@ -11,7 +11,7 @@
     * Index Skip Scan
     * Loose Index Scan
 * 참고 자료
-    * [→ explain에 대한 자세한 내용 보기](../optimization/explain.md)
+    * [→ explain에 대한 자세한 내용 보기](../../optimization/explain.md)
     * [→ index 종류에 대한 자세한 내용 보기](../index-basics.md)
     * [→ 각 scan 방식에 대한 개념 자세히 보기](../index-basics.md)
     * [→ selectivity 및 통계정보에 대한 개념 자세히 보기](../../optimization/optimizer-statistics.md)

@@ -2,8 +2,8 @@
 * Full Table Scan vs Index Full Scan
 * Full Table Scan vs Index Lookup
 * 참고자료
-    * [→ explain에 대한 자세한 내용 보기](../optimization/explain.md)
-    * [→ 각 scan 방식에 대한 개념 자세히 보기](../index/index-basics.md) 
+    * [→ explain에 대한 자세한 내용 보기](../../optimization/explain.md)
+    * [→ 각 scan 방식에 대한 개념 자세히 보기](../index-basics.md) 
 <br>
 
 # Full Table Scan vs Index Full Scan

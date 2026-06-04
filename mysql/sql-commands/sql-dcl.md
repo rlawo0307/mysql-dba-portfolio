@@ -1,4 +1,4 @@
-# [권한](../administration/privilege.md) 부여하기 (GRANT)
+# [권한](../administration/access-control.md) 부여하기 (GRANT)
 * 해당 권한을 가지고 있고, 그 권한에 대해 `grant option`이 있는 계정에서 수행 가능
 * 일반적으로 root 계정은 모든 권한을 가지고 있으므로 가능
 * MySQL 8.0부터는 계정 생성과 권한 부여를 별도로 수행해야 함
