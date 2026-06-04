@@ -9,7 +9,7 @@
 
 # 폴더 구성
 ### administration
-* MySQL 설치 및 초기 설정 - [installation.md](administration/installation.md)
+* MySQL 설치 및 접속- [mysql-installation.md](administration/mysql-installation.md)
 * MySQL 설정 관리 - [configuration-management.md](administration/configuration-management.md)
 * 데이터베이스 관리 - [database-basic-operations.md](administration/database-basic-operations.md)
 * Access Control (계정, 권한, role) - [access-control.md](administration/access-control.md)
@@ -50,7 +50,7 @@
 * Foreign Key 동작 분석 - [fk-behavior.md](core-concepts/labs/fk-behavior.md)
 ---
 ### index
-* B+Tree 구조 + 인덱스 기본 개념 - [index-basics.md](index/index-basics.md)
+* B+Tree 구조 + 인덱스 - [index-basics.md](index/index-basics.md)
 * 인덱스를 타지 않는 쿼리 패턴 - [index-antipatterns.md](index/index-antipatterns.md)
 * 인덱스 힌트 - [index-hint.md](index/index-hint.md)
 #### labs
@@ -63,7 +63,7 @@
 * 인덱스 성능 실험2 - [index-performance-experiment-2.md](index/labs/index-performance-experiment-2.md)
 ---
 ### optimization
-* 실행 계획 해석 - [explain.md](optimization/explain.md)
+* Explain / Explain Analyze - [explain.md](optimization/explain.md)
 * 옵티마이저와 통계정보 - [optimizer-statistics.md](optimization/optimizer-statistics.md)
 * Optimizer Trace - [optimizer-trace](optimization/optimizer-trace.md)
 * Index Condition Pushdown (ICP) - [index-condition-pushdown.md](optimization/index-condition-pushdown.md)
@@ -76,7 +76,7 @@
 * Optimizer Trace + Cost Model 분석 - [optimizer-trace-and-cost-model.md](optimization/labs/optimizer-trace-and-cost-model.md)
 ---
 ### partitioning
-* 파티셔닝 기본 개념 - [partitioning-basics.md](partitioning/partitioning-basics.md)
+* 파티셔닝 - [partitioning-basics.md](partitioning/partitioning-basics.md)
 * Partitioned Index - [partition-index.md](partitioning/partition-index.md)
 * 파티션 관리 - [partition-maintenance.md](partitioning/partition-maintenance.md)
 #### labs
@@ -96,7 +96,7 @@
 * Role 관리 - [role-management](sql-commands/role-management.md)
 ---
 ### transaction
-* 트랜잭션 기본 개념 - [transaction-basics.md](transaction/transaction-basics.md)
+* 트랜잭션 - [transaction-basics.md](transaction/transaction-basics.md)
 * 트랜잭션 메커니즘 (undo / redo / MVCC) - [transaction-mechanism.md](transaction/transaction-mechanism.md)
 * Consistent Read vs Current Read - [consistent-vs-current-read.md](transaction/consistent-vs-current-read.md)
 * 격리 수준 - [isolation-levels.md](transaction/isolation-levels.md)

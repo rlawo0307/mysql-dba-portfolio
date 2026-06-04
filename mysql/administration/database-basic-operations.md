@@ -1,24 +1,26 @@
-# 데이터베이스 목록 조회하기
+# 데이터베이스 관리
+## 데이터베이스 목록 조회
 ### 전체 데이터베이스 목록 조회
 ```sql
 show databases;
 ```
-```
+```sql
 +--------------------+
 | Database           |
 +--------------------+
-| information_schema |
-| mysql              |
-| performance_schema |
-| sys                |
+| information_schema | -- 데이터베이스 객체의 메타데이터를 조회하기 위한 시스템 데이터베이스
+| mysql              | -- 계정, 권한, role 등 MySQL 내부 정보를 저장하는 시스템 데이터베이스
+| performance_schema | -- 성능 모니터링 및 진단 정보를 제공하는 시스템 데이터베이스
+| sys                | -- performance_schema 정보를 보기 쉽게 제공하는 view 모음
 +--------------------+
 4 rows in set (0.00 sec)
 ```
 ### 현재 데이터베이스 조회
+* 현재 세션에서 사용 중인 데이터베이스 확인
 ```sql
-select DATABASE();
+select database();
 ```
-```
+```sql
 +------------+
 | database() |
 +------------+
@@ -26,68 +28,22 @@ select DATABASE();
 +------------+
 1 row in set (0.00 sec)
 ```
-<br>
-
-# 데이터베이스 생성하기
-* 반드시 root 계정에서만 데이터베이스 생성/삭제 가능한 것은 아님
+## 데이터베이스 생성
+* `create` 권한 필요
+* 반드시 root 계정에서만 수행 가능한 것은 아님
 * 권한만 있다면 일반 계정에서도 가능
-### 데이터베이스 생성
 ```sql
-create database db1;
+create database 데이터베이스명;
 ```
-### 생성한 데이터베이스 확인
+## 데이터베이스 삭제
+* 데이터베이스 내부의 모든 테이블과 데이터도 함께 삭제됨
+* 백업이 없다면 복구가 어려우므로 주의 필요
 ```sql
-show databases;
+drop database 데이터베이스명;
 ```
-```
-+--------------------+
-| Database           |
-+--------------------+
-| db1                |
-| information_schema |
-| mysql              |
-| performance_schema |
-| sys                |
-+--------------------+
-5 rows in set (0.00 sec)
-```
-<br>
-
-# 데이터베이스 삭제하기
-### 데이터베이스 삭제
+## 데이터베이스 전환
+* 현재 작업할 데이터베이스를 변경
+* 이후 실행하는 SQL은 해당 데이터베이스를 기준으로 수행
 ```sql
-drop database db1;
-```
-### 현재 데이터베이스 확인
-```sql
-show databases;
-```
-```
-+--------------------+
-| Database           |
-+--------------------+
-| information_schema |
-| mysql              |
-| performance_schema |
-| sys                |
-+--------------------+
-4 rows in set (0.00 sec)
-```
-<br>
-
-# 데이터베이스 전환하기
-```sql
-use mysql;
-
-select user, host from user;
-+------------------+-----------+
-| user             | host      |
-+------------------+-----------+
-| debian-sys-maint | localhost |
-| mysql.infoschema | localhost |
-| mysql.session    | localhost |
-| mysql.sys        | localhost |
-| root             | localhost |
-+------------------+-----------+
-5 rows in set (0.00 sec)
+use 데이터베이스명;
 ```

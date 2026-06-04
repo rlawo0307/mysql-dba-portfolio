@@ -8,8 +8,10 @@
 * startup
     * 프로그램 시작 시 설정 파일을 읽고 적용
     * 파일 수정 후 재시작 필요
+    * runtime 변경이 불가능한 read-only 변수 존재
 * runtime
     * 동적 변수는 실행 중 변경 가능
+    * 변경 범위는 session 도는 global
 ## 설정 파일 위치 및 내용 확인
 ### 설정 파일 경로 확인
 ```bash
@@ -44,37 +46,20 @@ done
 [X] /home/dbadmin/.my.cnf
 ```
 ### 설정 파일 내용 확인
-* `/etc/mysql/my.cnf`는 직접 설정을 담고 있지 않음
-    * 다른 설정 파일들을 include 해서 읽게 만드는 파일
-    * include된 파일은 `my.cnf`보다 나중에 읽힘
-        * `my.cnf` → `conf.d` → `mysql.conf.d`
-        * include된 디렉토리는 선언된 순서대로 읽힘
-        * 뒤에 있는 파일이 override 가능
+* `my.cnf`는 설정을 직접 담고 있지 않으며 다른 설정 파일들을 include 하고 있는 파일임
+* include된 파일은 `my.cnf`보다 나중에 읽힘
+* include된 디렉토리는 선언된 순서대로 읽힘
+    * 디렉토리 내 파일은 파일명 기준 알파벳 순으로 읽힘
+* 뒤에 있는 파일이 override 가능
 ```bash
 cat /etc/mysql/my.cnf
 ```
 ```bash
-#
-# The MySQL database server configuration file.
-#
-# You can copy this to one of:
-# - "/etc/mysql/my.cnf" to set global options,
-# - "~/.my.cnf" to set user-specific options.
-# 
-# One can use all long options that the program supports.
-# Run program with --help to get a list of available options and with
-# --print-defaults to see which it would actually understand and use.
-#
-# For explanations see
-# http://dev.mysql.com/doc/mysql/en/server-system-variables.html
-
-#
-# * IMPORTANT: Additional settings that can override those from this file!
-#   The files must end with '.cnf', otherwise they'll be ignored.
-#
-
 !includedir /etc/mysql/conf.d/
 !includedir /etc/mysql/mysql.conf.d/
+
+# `my.cnf` → `conf.d` → `mysql.conf.d`
+# 실제 적용되는 설정은 include된 파일까지 모두 고려해야 함
 ```
 * `/etc/mysql/conf.d/`
     * 추가 설정 파일을 두는 디렉토리
@@ -82,10 +67,9 @@ cat /etc/mysql/my.cnf
 * `/etc/mysql/mysql.conf.d/`
     * Ubuntu 패키지 기본 mysqld 설정 파일이 위치하는 디렉토리
     * 해당 디렉토리 하위의 *.cnf 파일 전부를 읽음
-* 디렉토리 내 파일은 파일명 기준 알파벳 순으로 읽힘
 ## 주요 섹션
 ### [mysqld]
-* MySQL server daemon(mysqld) 설정
+* MySQL Server 프로세스(mysqld) 설정
 * 대표 설정
     * 클라이언트 연결 관련
         * `max_connections` : 동시 접속 가능한 최대 connection 수
@@ -125,15 +109,16 @@ cat /etc/mysql/my.cnf
     * `quick` : row 단위로 읽어 메모리 사용량을 줄이며 dump 수행
     * `single-transaction` : consistent read 기반으로 snapshot dump 수행
     * `max_allowed_packet` : dump 중 처리 가능한 최대 packet 크기
-## 설정 변수 확인
+## 시스템 변수 조회 및 변경
+* 설정 파일에 정의된 값은 서버 시작 시 시스템 변수로 적용됨
 * 실제 적용된 설정 값은 설정 파일이 아닌 `show variables` 결과로 확인해야 함
     * 동적으로 변경된 값이 있을 수 있음
-### 전체 변수 확인
+### 전체 변수 조회
 ```sql
-show global variables; -- 서버 전체 변수 조회
+show global variables;  -- 서버 전체 변수 조회
 show session variables; -- 세션 변수 조회, show variables; 와 동일
 ```
-### 특정 변수 확인
+### 특정 변수 조회
 ```sql
 show global variables like 'max_connections';
 ```
@@ -161,6 +146,6 @@ set global innodb_buffer_pool_load_at_startup = off; -- fail
 ```
 ```sql
 ERROR 1238 (HY000): Variable 'innodb_buffer_pool_load_at_startup' is a read only variable
--- startup 전용 변수는 runtime에 변경할 수 없음
+-- read-only 변수는 실행 중 변경할 수 없음
 -- 설정 파일에서 수정 후 서버 재시작 필요
 ```

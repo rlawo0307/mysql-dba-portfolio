@@ -1,9 +1,10 @@
-# MySQL 설치
+# MySQL 설치 및 접속
+## MySQL 설치
 ```bash
 sudo apt update
 sudo apt install mysql-server
 ```
-# MySQL 서비스 상태 확인
+## MySQL 서비스 상태 확인
 ```bash
 sudo systemctl status mysql
 ```
@@ -24,38 +25,28 @@ sudo systemctl status mysql
 Jan 08 18:53:28 mysql-db systemd[1]: Starting mysql.service - MySQL Community Server...
 Jan 08 18:53:29 mysql-db systemd[1]: Started mysql.service - MySQL Community Server.
 ```
-# MySQL에 root 사용자로 접속 시도해보기
+* `Active`
+   * 현재 서비스 상태
+   * 가능한 값
+      * `active (running)` : 정상 실행 중
+      * `active (exited)` : 작업 완료 후 종료
+      * `inactive (dead)` : 실행 중 아님
+      * `failed` : 비정상 종료
+      * `activating` : 시작 중
+      * `deactivating` : 종료 중
+* `Main PID`
+   * MySQL Server 프로세스(mysqld)의 PID
+* `Status`
+   * MySQL 내부 상태
+   * `"Server is operational"` 이면 정상적으로 요청을 처리 가능한 상태
+## MySQL 접속
+* `-u` : 사용자명 지정
+* `-p` : 비밀번호 입력
+* `-h` : 접속할 host 지정
+* `-P` : 포트 번호 지정
 ```bash
 sudo mysql -u root
-```
-```
-Welcome to the MySQL monitor.  Commands end with ; or \g.
-Your MySQL connection id is 10
-Server version: 8.0.44-0ubuntu0.24.04.2 (Ubuntu)
-
-Copyright (c) 2000, 2025, Oracle and/or its affiliates.
-
-Oracle is a registered trademark of Oracle Corporation and/or its
-affiliates. Other names may be trademarks of their respective
-owners.
-
-Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
-
-mysql> 
-```
-
-# root 계정으로 데이터베이스 목록 조회해보기
-```sql
-show databases;
-```
-```sql
-+--------------------+
-| Database           |
-+--------------------+
-| information_schema |
-| mysql              |
-| performance_schema |
-| sys                |
-+--------------------+
-4 rows in set (0.01 sec)
+mysql -u 사용자명 -p
+mysql -u 사용자명 -p -h host/IP
+mysql -u 사용자명 -p -h host/IP -P 포트번호
 ```
