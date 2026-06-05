@@ -92,6 +92,7 @@
 * 로그 기록 방식
     * InnoDB는 `WAL(Write-Ahead Logging)` 원칙을 따름
         * 변경된 데이터 페이지가 디스크에 반영되기 전에 관련 redo log가 먼저 durable 해야 함
+        * redo log 기록 성공 후 commit 허용
             1. 변경 내용(redo log)을 메모리(`redo log buffer`)에 기록
             2. 커밋 시, redo log buffer의 내용을 디스크(`redo log file`)로 flush
             3. 나중에 메모리([buffer pool](../core-concepts/innodb-memory-architecture.md))의 dirty data/index page를 디스크에 반영

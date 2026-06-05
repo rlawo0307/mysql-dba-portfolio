@@ -27,6 +27,7 @@
 ---
 ### availability
 * Backup & Recovery - [backup-and-recovery.md](availability/backup-and-recovery.md)
+* Crash Recovery - [crash-recovery.md](availability/crash-recovery.md)
 * Binlog & GTID - [binlog-and-GTID.md](availability/binlog-and-GTID.md)
 * Replication 및 Clustering - [replication-and-clustering.md](availability/replication-and-clustering.md)
 * Failover - [failover.md](availability/failover.md)

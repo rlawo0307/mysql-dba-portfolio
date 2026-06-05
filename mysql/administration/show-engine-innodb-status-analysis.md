@@ -476,7 +476,7 @@ Log maximum file id is       3793        -- 현재 redo log 최대 file id
         * redo 생성 / redo log file write / disk flush가 거의 같은 지점까지 진행된 상태
         * 즉, redo 처리가 밀리지 않고 정상적으로 따라가고 있는 상태
     * `Log sequence number`와 `Last checkpoint at`의 차이가 큰 경우
-        * redo log가 생성된 최신 위치와 crash recovery 기준점(checkpoint) 사이 차이가 큰 경우
+        * redo log가 생성된 최신 위치와 crash recovery 기준점([checkpoint](../availability/crash-recovery.md)) 사이 차이가 큰 경우
         * checkpoint lag가 큰 상태
         * redo log는 계속 생성되고 있지만 checkpoint가 그만큼 따라오지 못하는 상태
         * dirty page flush가 밀리거나 write workload가 높은 상황에서 발생할 수 있음

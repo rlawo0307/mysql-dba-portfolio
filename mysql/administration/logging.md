@@ -196,7 +196,7 @@ mysqlbinlog <relay log file 경로> # MySQL parser로 해석
 ```
 ## [Redo Log](../transaction/transaction-mechanism.md)
 * 특징
-    * InnoDB의 crash recovery를 위한 내부 로그
+    * InnoDB의 [crash recovery](../availability/crash-recovery.md)를 위한 내부 로그
     * data page 변경 내용을 기록하는 physical log
     * WAL(Write-Ahead Logging) 기반으로 동작
     * committed transaction 복구에 사용
