@@ -103,6 +103,7 @@
 * Consistent Read vs Current Read - [consistent-vs-current-read.md](transaction/consistent-vs-current-read.md)
 * 격리 수준 - [isolation-levels.md](transaction/isolation-levels.md)
 * Locking (record / gap / next-key lock) - [locking.md](transaction/locking.md)
+* MDL - [MDL.md](transaction/MDL.md)
 * Deadlock - [deadlock.md](transaction/deadlock.md)
 #### labs
 * 트랜잭션 lifecycle 확인 - [transaction-implicit-commit.md](transaction/labs/transaction-implicit-commit.md)
