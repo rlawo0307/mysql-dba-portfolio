@@ -43,6 +43,7 @@
 * InnoDB 물리적 저장 구조 - [storage-architecture.md](core-concepts/storage-architecture.md)
 * InnoDB 메모리 구조 - [innodb-memory-architecture.md](core-concepts/innodb-memory-architecture.md)
 * MySQL SQL Compiler Engine - [sql-compiler-engine.md](core-concepts/sql-compiler-engine.md)
+* Metadata 관리 구조 - [metadata-management.md](core-concepts/metadata-management.md)
 * 데이터 타입 - [data-types-theory.md](core-concepts/data-types-theory.md)
 * 제약조건 - [constraint-theory.md](core-concepts/constraint-theory.md)
 * MySQL 내장함수 - [builtin-functions.md](core-concepts/builtin-functions.md)
