@@ -163,7 +163,7 @@ Redo Log Buffer(memory)에 변경 내용 기록
            ↓
 Redo Log File(disk)로 flush
 ```
-## LSN 과 Checkpoint
+## LSN 과 [Checkpoint](../availability/crash-recovery.md)
 * 데이터 변경 시, data page는 즉시 반영되지 않고 redo log만 먼저 기록됨
 * 즉, data file은 항상 최신 상태가 아닐 수 있음
 * 어디까지 disk에 반영됐는지 알 수 있어야 함

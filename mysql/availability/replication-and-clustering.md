@@ -98,7 +98,7 @@ Clustering : 복제 + 고가용성 운영 구조(서비스 지속성, 노드 집
 ## Replication Lag
 * source의 커밋 시점과 replica의 반영 시점 사이에서 발생하는 시간 차이
 * replica가 source를 늦게 따라가는 상태
-* async replication에서 발생
+* async replication에서 발생 가능
     * source는 replica의 반영을 기다리지 않음
     * source는 트랜잭션이 커밋되었지만
     * replica에 변경사항이 반영되었는지 보장할 수 없음
