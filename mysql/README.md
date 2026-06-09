@@ -110,6 +110,7 @@
 * MVCC snapshot 생성 시점 및 동작 확인 - [mvcc-snapshot-check.md](transaction/labs/mvcc-snapshot-check.md)
 * Isolation level 별 동작 비교 - [isolation-level-comparison.md](transaction/labs/isolation-level-comparison.md)
 * Transaction Anomaly 재현 및 해결 - [transaction-anomaly-experiment.md](transaction/labs/transaction-anomaly-experiment.md)
+* MDL 대기 상황 분석 - [metadata-lock-analysis.md](transaction/labs/metadata-lock-analysis.md)
 * Gap Lock 범위 시각화 - [gap-lock-range-visualization.md](transaction/labs/gap-lock-range-visualization.md)
 * 인덱스 별 lock 범위 비교 - [locking-index-behavior.md](transaction/labs/locking-index-behavior.md)
 * Order by 방식에 따른 lock 범위 비교 - [locking-order-by-behavior.md](transaction/labs/locking-order-by-behavior.md)
